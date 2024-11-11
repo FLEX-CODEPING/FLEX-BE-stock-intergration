@@ -23,8 +23,10 @@ base_headers = env_cfg.get_base_headers()
 cfg = env_cfg.get_full_config()
 korea_invest_client = KoreaInvestClient(cfg, base_headers)
 
+stock_router = APIRouter(prefix = "/api/stocks", tags = ["stock"])
 
-@app.get("/current-price/{stock_code}")
+
+@stock_router.get("/inquire-price/{stock_code}")
 async def get_current_price(stock_code: str):
     try:
         price_info_map = korea_invest_client.get_inquire_price(stock_code)
