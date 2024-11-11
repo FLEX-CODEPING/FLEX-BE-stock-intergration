@@ -4,6 +4,7 @@ from app.utils.korea_invest_api import KoreaInvestAPI
 
 
 class KoreaInvestClient(KoreaInvestAPI):
+    # 주식 현재가 시세
     def get_inquire_price(self, stock_no):
         url = "/uapi/domestic-stock/v1/quotations/inquire-price"
         tr_id = "FHKST01010100"
