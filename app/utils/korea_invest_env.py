@@ -1,7 +1,7 @@
 import json
 import requests
 import copy
-from app.core.custom_exception import KoreaInvestException
+from app.exceptions.custom_exception import KoreaInvestException
 
 class KoreaInvestEnv:
     def __init__(self, cfg):

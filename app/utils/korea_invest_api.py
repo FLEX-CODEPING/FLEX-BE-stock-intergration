@@ -2,7 +2,7 @@ from collections import namedtuple
 from loguru import logger
 import json
 import requests
-from app.core.custom_exception import KoreaInvestException
+from app.exceptions.custom_exception import KoreaInvestException
 from app.core.common_response import ApiResponseDTO
 
 
@@ -39,9 +39,8 @@ class KoreaInvestAPI:
             return api_response.to_api_response_dto()
         except requests.RequestException as e:
             raise KoreaInvestException(
-                message = f"Request failed: {str(e)}",
-                custom_code = "KIS_REQUEST",
-                details = {"url": url, "tr_id": tr_id}
+                message=f"Request failed: {str(e)}",
+                details={"url": url, "tr_id": tr_id}
             )
 
 
