@@ -2,8 +2,9 @@ from collections import namedtuple
 from loguru import logger
 import json
 import requests
-from app.exceptions.custom_exception import KoreaInvestException
-from app.core.common_response import ApiResponseDTO
+from app.exceptions.custom_exception import BaseCustomException
+from app.core.common_response import CommonResponseDto
+from app.exceptions.error_code import ErrorCode
 
 
 class KoreaInvestAPI:
@@ -38,9 +39,9 @@ class KoreaInvestAPI:
             api_response = APIResponse(res)
             return api_response.to_api_response_dto()
         except requests.RequestException as e:
-            raise KoreaInvestException(
-                message=f"Request failed: {str(e)}",
-                details={"url": url, "tr_id": tr_id}
+            raise BaseCustomException(
+                ErrorCode.KIS_REQUEST_FAIL,
+                details = {"url": api_url, "tr_id": tr_id, "exception": str(e)}
             )
 
 
@@ -108,10 +109,9 @@ class APIResponse:
 
     def to_api_response_dto(self):
         if self.is_ok():
-            return ApiResponseDTO(result = self.get_body().output)
+            return CommonResponseDto(result = self.get_body().output)
         else:
-            raise KoreaInvestException(
-                message = self.get_error_message(),
-                custom_code=f"KIS_ERROR_{self.get_error_code()}",
+            raise BaseCustomException(
+                ErrorCode.KIS_REQUEST_FAIL,
                 details = {"response_body": self.get_body()._asdict()}
             )
