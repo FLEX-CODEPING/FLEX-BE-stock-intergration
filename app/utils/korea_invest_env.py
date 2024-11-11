@@ -1,7 +1,8 @@
 import json
 import requests
 import copy
-from app.exceptions.custom_exception import KoreaInvestException
+from app.exceptions.custom_exception import BaseCustomException
+from app.exceptions.error_code import ErrorCode
 
 class KoreaInvestEnv:
     def __init__(self, cfg):
@@ -54,7 +55,10 @@ class KoreaInvestEnv:
             my_token = res.json()['access_token']
             return f"Bearer {my_token}"
         except requests.exceptions.RequestException as e:
-            raise KoreaInvestException(f"Failed to get account access token: {str(e)}")
+            raise BaseCustomException(
+                ErrorCode.KIS_ACCESS_TOKEN_REQUEST_FAIL,
+                details={"Failed to get account access token: ": str(e)}
+            )
 
     def get_websocket_approval_key(self, request_base_url = '', api_key = '', api_secret_key = ''):
         body = {
@@ -68,10 +72,10 @@ class KoreaInvestEnv:
         try:
             res = requests.post(websocket_key_url, headers = self.base_headers, data = json.dumps(body))
             res.raise_for_status()
-            approval_key = res.json().get('approval_key')
-
-            if approval_key is None:
-                raise KoreaInvestException("Approval key not found in response.")
+            approval_key = res.json()['approval_key']
             return approval_key
         except requests.exceptions.RequestException as e:
-            raise KoreaInvestException(f"Failed to get websocket approval key: {str(e)}")
+            raise BaseCustomException(
+                ErrorCode.KIS_WEBSOCKET_KEY_REQUEST_FAIL,
+                details={"Failed to get websocket approval key: ": str(e)}
+            )
