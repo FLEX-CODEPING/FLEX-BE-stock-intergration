@@ -1,5 +1,5 @@
 import yaml
-from fastapi import FastAPI, HTTPException, APIRouter
+from fastapi import FastAPI, APIRouter
 from fastapi.security import HTTPBearer
 from app.utils.korea_invest_env import KoreaInvestEnv
 from app.services.korea_invest_client import KoreaInvestClient
@@ -43,14 +43,6 @@ stock_router = APIRouter(prefix = "/api/stocks", tags = ["stock"])
 
 @stock_router.get("/inquire-price/{stock_code}")
 async def get_current_price(stock_code: str):
-    try:
-        price_info_map = korea_invest_client.get_inquire_price(stock_code)
-
-        if not price_info_map:
-            raise HTTPException(status_code=404, detail="Stock price information not found")
-
-        return price_info_map
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+    return korea_invest_client.get_inquire_price(stock_code)
 
 app.include_router(stock_router)
