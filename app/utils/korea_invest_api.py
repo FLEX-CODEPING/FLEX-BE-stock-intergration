@@ -109,9 +109,10 @@ class APIResponse:
 
     def to_api_response_dto(self):
         if self.is_ok():
+            self.print_all()
             return CommonResponseDto(result = self.get_body().output)
         else:
             raise BaseCustomException(
                 ErrorCode.KIS_REQUEST_FAIL,
-                details = {"response_body": self.get_body()._asdict()}
+                details = {"print_error": self.print_error()}
             )
