@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, Any
 
 
-class ApiResponseDTO(BaseModel):
+class CommonResponseDto(BaseModel):
     isSuccess: bool = True
     code: str = "COMMON_200"
     message: str = "성공"
