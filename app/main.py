@@ -31,12 +31,12 @@ setup_swagger(app)
 security = HTTPBearer()
 
 with open("./app/config/config.yaml", encoding = 'UTF-8') as f:
-    cfg = yaml.safe_load(f)
+    config = yaml.safe_load(f)
 
-env_cfg = KoreaInvestEnv(cfg)
-base_headers = env_cfg.get_base_headers()
-cfg = env_cfg.get_full_config()
-korea_invest_client = KoreaInvestClient(cfg, base_headers)
+env_config = KoreaInvestEnv(config)
+base_headers = env_config.get_base_headers()
+config = env_config.get_full_config()
+korea_invest_client = KoreaInvestClient(config, base_headers)
 
 stock_router = APIRouter(prefix = "/api/stocks", tags = ["stock"])
 
