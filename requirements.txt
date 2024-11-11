@@ -1,0 +1,14 @@
+requests~=2.32.3
+websockets
+pandas
+loguru~=0.7.2
+pyyaml~=6.0.2
+pycryptodome
+PyQt5
+urllib3==1.26.15
+bs4
+openpyxl
+fastapi~=0.115.4
+uvicorn
+pydantic~=2.9.2
+python-dotenv~=1.0.1
