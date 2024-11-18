@@ -1,10 +1,14 @@
 import yaml
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPBearer
+import asyncio
+from loguru import logger
 from app.utils.korea_invest_env import KoreaInvestEnv
 from app.services.korea_invest_client import KoreaInvestClient
 from app.config.swagger_config import setup_swagger
 from fastapi.middleware.cors import CORSMiddleware
+from app.services.korea_invest_ws_client import KoreaInvestWebSocket
+
 
 app = FastAPI(
     docs_url = "/api/stock-service/swagger-ui.html",
@@ -36,13 +40,37 @@ with open("./app/config/config.yaml", encoding = 'UTF-8') as f:
 env_config = KoreaInvestEnv(config)
 base_headers = env_config.get_base_headers()
 config = env_config.get_full_config()
-korea_invest_client = KoreaInvestClient(config, base_headers)
 
 stock_router = APIRouter(prefix = "/api/stocks", tags = ["stock"])
 
 
 @stock_router.get("/inquire-price/{stock_code}")
 async def get_current_price(stock_code: str):
+    korea_invest_client = KoreaInvestClient(config, base_headers)
     return korea_invest_client.get_inquire_price(stock_code)
+
+
+korea_invest_client = KoreaInvestClient(config, base_headers)
+websocket_url = config['paper_websocket_url'] if config['is_paper_trading'] else config['websocket_url']
+korea_invest_websocket = KoreaInvestWebSocket(korea_invest_client, websocket_url)
+
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(korea_invest_websocket.run())
+
+@app.websocket("/api/stocks/{stock_code}/real-time")
+async def websocket_endpoint(websocket: WebSocket, stock_code: str):
+    await websocket.accept()
+    try:
+        await korea_invest_websocket.subscribe(stock_code) # 주가 정보 subscribe
+
+        while True:
+            data = await korea_invest_websocket.get_stock_data(stock_code)
+            if data:
+                await websocket.send_json(data)
+            await asyncio.sleep(1)
+    except WebSocketDisconnect:
+        logger.info(f"Client disconnected for stock {stock_code}")
 
 app.include_router(stock_router)
