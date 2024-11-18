@@ -89,6 +89,64 @@ class KoreaInvestApi:
             )
 
 
+    def get_send_data(self, cmd=None, stockcode=None):
+        # 입력값 체크 step
+        global tr_type, tr_id
+        assert 0 < cmd < 9, f"Wrong Input Data: {cmd}"
+
+        # 입력값에 따라 전송 데이터셋 구분 처리
+        if cmd == 1: # 주식 호가 등록
+            tr_id = 'H0STASP0'
+            tr_type = '1'
+        elif cmd == 2: # 주식 호가 등록 해제
+            tr_id = 'H0STASP0'
+            tr_type = '2'
+        if cmd == 3: # 주식 체결 등록
+            tr_id = 'H0STCNT0'
+            tr_type = '1'
+        elif cmd == 4: # 주식 체결 등록 해제
+            tr_id = 'H0STCNT0'
+            tr_type = '2'
+        if cmd == 5: # 주식 체결 통보 등록 (고객용)
+            tr_id = 'H0STCNI0' # 고객 체결 통보
+            tr_type = '1'
+        elif cmd == 6: # 주식 체결 통보 등록 해제 (고객용)
+            tr_id = 'H0STCNI0' # 고객 체결 통보
+            tr_type = '2'
+        if cmd == 7: # 주식 체결 통보 등록 (모의)
+            tr_id = 'H0STCNI9' # 테스트용 직원 체결 통보
+            tr_type = '1'
+        elif cmd == 8: # 주식 체결 통보 등록 해제 (모의)
+            tr_id = 'H0STCNI9' # 테스트용 직원 체결 통보
+            tr_type = '2'
+
+        # send json, 체결 통보는 tr_key 입력 항목이 상이하므로 분리
+        if cmd in (5,6,7,8):
+            senddata = (
+                f'{{"header":{{'
+                f'"approval_key":"{self.websocket_approval_key}", '
+                f'"custtype":"{self.cust_type}", '
+                f'"tr_type":"{tr_type}", '
+                f'"content-type":"utf-8"}}, '
+                f'"body":{{"input":{{'
+                f'"tr_id":"{tr_id}", '
+                f'"tr_key":"{self.hts_id}"}}}}}}'
+            )
+        else:
+            senddata = (
+                f'{{"header":{{'
+                f'"approval_key":"{self.websocket_approval_key}", '
+                f'"custtype":"{self.cust_type}", '
+                f'"tr_type":"{tr_type}", '
+                f'"content-type":"utf-8"}}, '
+                f'"body":{{"input":{{'
+                f'"tr_id":"{tr_id}", '
+                f'"tr_key":"{stockcode}"}}}}}}'
+            )
+
+        return senddata
+
+
 class KisApiResponse:
     """KisApiResponse class 는 API 응답을 처리하고, 응답을 객체로 변환하여 헤더, 본문 등의 정보를 추출 및 관리합니다.
 
