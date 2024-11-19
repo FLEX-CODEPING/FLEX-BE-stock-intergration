@@ -1,19 +1,22 @@
 import yaml
-from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect, Body
 from fastapi.security import HTTPBearer
 import asyncio
 from loguru import logger
 from app.utils.korea_invest_env import KoreaInvestEnv
-from app.services.korea_invest_client import KoreaInvestClient
+from app.services.korea_invest_rest_client import KoreaInvestRestClient
 from app.config.swagger_config import setup_swagger
 from fastapi.middleware.cors import CORSMiddleware
-from app.services.korea_invest_ws_client import KoreaInvestWebSocket
+from app.services.korea_invest_ws_client import KoreaInvestWebSocketClient
+from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
+from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
+from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
 
 
 app = FastAPI(
     docs_url = "/api/stock-service/swagger-ui.html",
     openapi_url = "/api/stock-service/openapi.json",
-    title = "Stock Controller"
+    title = "KIS Stock Data Controller"
 )
 
 origins = [
@@ -41,18 +44,23 @@ env_config = KoreaInvestEnv(config)
 base_headers = env_config.get_base_headers()
 config = env_config.get_full_config()
 
-stock_router = APIRouter(prefix = "/api/stocks", tags = ["stock"])
+stock_router = APIRouter(prefix = "/api/kis/stocks", tags = ["stock"])
 
 
-@stock_router.get("/inquire-price/{stock_code}")
-async def get_current_price(stock_code: str):
-    korea_invest_client = KoreaInvestClient(config, base_headers)
+@stock_router.get(
+    "/{stock_code}/inquire-price",
+    summary="주식 현재가 시세 API 요청",
+    description="Retrieve the latest price information for a specific stock using its stock code."
+)
+async def get_inquire_price(stock_code: str):
+    config['is_paper_trading'] = True
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
     return korea_invest_client.get_inquire_price(stock_code)
 
 
-korea_invest_client = KoreaInvestClient(config, base_headers)
+korea_invest_client = KoreaInvestRestClient(config, base_headers)
 websocket_url = config['paper_websocket_url'] if config['is_paper_trading'] else config['websocket_url']
-korea_invest_websocket = KoreaInvestWebSocket(korea_invest_client, websocket_url)
+korea_invest_websocket = KoreaInvestWebSocketClient(korea_invest_client, websocket_url)
 
 
 @app.on_event("startup")

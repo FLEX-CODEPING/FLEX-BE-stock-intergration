@@ -4,7 +4,7 @@ import asyncio
 from loguru import logger
 
 
-class KoreaInvestWebSocket:
+class KoreaInvestWebSocketClient:
     def __init__(self, korea_invest_api, websocket_url):
         self.korea_invest_api = korea_invest_api
         self.websocket_url = websocket_url
