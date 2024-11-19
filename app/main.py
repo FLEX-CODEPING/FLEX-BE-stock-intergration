@@ -71,6 +71,19 @@ async def get_daily_trade_volume(
     return korea_invest_client.get_daily_trade_volume(request)
 
 
+@stock_router.get(
+    "/ranking/fluctuation",
+    summary="국내 주식 등락률 순위 API 요청 (국내 주식 등락률 순위[v1_국내주식-088])",
+    description="Retrieve the latest price information for a specific stock using its stock code."
+)
+async def get_ranking_fluctuation(
+    request: RankingFluctuationReq = Body(...)
+):
+    config['is_paper_trading'] = False
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return korea_invest_client.get_ranking_fluctuation(request)
+
+
 korea_invest_client = KoreaInvestRestClient(config, base_headers)
 websocket_url = config['paper_websocket_url'] if config['is_paper_trading'] else config['websocket_url']
 korea_invest_websocket = KoreaInvestWebSocketClient(korea_invest_client, websocket_url)
