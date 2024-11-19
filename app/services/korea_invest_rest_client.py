@@ -78,3 +78,23 @@ class KoreaInvestRestClient(KoreaInvestApi):
         }
 
         return self._url_fetch(url, tr_id, params)
+
+
+    def get_daily_item_chart_price(self, request: DailyItemChartPriceReq):
+        """국내 주식 기간별 시세 (일/주/월/년) API 요청.
+
+            Note: 국내주식기간별시세(일/주/월/년)[v1_국내주식-016]
+        """
+        url = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+        tr_id = "FHKST03010100"
+
+        params = {
+            'FID_COND_MRKT_DIV_CODE': request.market_div_code,
+            'FID_INPUT_ISCD': request.stock_code,
+            'FID_INPUT_DATE_1': request.date_from,
+            'FID_INPUT_DATE_2': request.date_to,
+            'FID_PERIOD_DIV_CODE': request.period_div_code,
+            'FID_ORG_ADJ_PRC': request.org_adj_price,
+        }
+
+        return self._url_fetch(url, tr_id, params)
