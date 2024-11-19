@@ -16,6 +16,7 @@ import requests
 from app.exceptions.custom_exception import BaseCustomException
 from app.core.common_response import CommonResponseDto
 from app.exceptions.error_code import ErrorCode
+import pandas as pd
 
 
 class KoreaInvestApi:
@@ -47,7 +48,7 @@ class KoreaInvestApi:
         self.hts_id = config['hts_id']
         self.using_url = config['using_url']
 
-    def _url_fetch(self, api_url, tr_id, params, is_post_request = False):
+    def _url_fetch(self, api_url, tr_id, params, is_post_request=False, target_columns=None, output_columns=None):
         """API 를 호출하고 결과를 반환합니다.
 
         Args:
@@ -55,6 +56,8 @@ class KoreaInvestApi:
             tr_id (str): 거래 id
             params (dict): API parameters
             is_post_request (bool): POST 요청 여부
+            target_columns (list, optional): 필터링 할 컬럼 리스트
+            output_columns (list, optional): 변환할 컬럼 리스트
 
         Returns:
             CommonResponseDto: 공통 응답 DTO
@@ -67,7 +70,6 @@ class KoreaInvestApi:
             headers = self._base_headers
 
             # 추가 Header 설정
-            tr_id = tr_id
             if tr_id[0] in ('T', 'J', 'C'):
                 if self.is_paper_trading:
                     tr_id = 'V' + tr_id[1:]
@@ -75,19 +77,64 @@ class KoreaInvestApi:
             headers["custtype"] = self.cust_type
 
             if is_post_request:
-                res = requests.get(url, headers = headers, data = json.dumps(params))
+                res = requests.get(url, headers=headers, data=json.dumps(params))
             else:
-                res = requests.get(url, headers = headers, params = params)
+                res = requests.get(url, headers=headers, params=params)
 
             res.raise_for_status()
             api_response = KisApiResponse(res)
-            return api_response.to_api_response_dto()
+
+            # 통합된 메서드로 처리
+            return self.process_response(api_response, target_columns, output_columns)
+
         except requests.RequestException as e:
             raise BaseCustomException(
                 ErrorCode.KIS_REQUEST_FAIL,
-                details = {"url": api_url, "tr_id": tr_id, "exception": str(e)}
+                details={"url": api_url, "tr_id": tr_id, "exception": str(e)}
             )
 
+    def process_response(self, api_response, target_columns=None, output_columns=None):
+        """응답 데이터를 필터링하고, CommonResponseDto 로 반환합니다.
+
+        Args:
+            api_response (KisApiResponse): API 응답 객체
+            target_columns (list, optional): 필터링 할 컬럼 리스트. 기본값은 None.
+            output_columns (list, optional): 변환할 컬럼 리스트. 기본값은 None.
+
+        Returns:
+            CommonResponseDto: 처리된 응답 데이터를 포함한 공통 응답 DTO
+
+        Raises:
+            BaseCustomException: API 요청 실패 예외
+        """
+        if api_response.is_ok():
+            body = api_response.get_body()
+
+            for key in ["output", "output1", "output2"]:
+                if hasattr(body, key) and getattr(body, key):
+                    output_data = getattr(body, key)
+
+                    if isinstance(output_data, dict):
+                        df = pd.DataFrame([output_data])
+                    elif isinstance(output_data, list):
+                        df = pd.DataFrame(output_data)
+                    else:
+                        df = pd.DataFrame(output_data)
+
+                    # 컬럼 필터링 및 변환
+                    if target_columns and output_columns and all(col in df.columns for col in target_columns):
+                        columns_rename_map = dict(zip(target_columns, output_columns))
+                        df = df[target_columns].rename(columns=columns_rename_map)
+
+                    return CommonResponseDto(result=df.to_dict(orient="records"))
+
+            return CommonResponseDto(result=body)
+
+        else:
+            raise BaseCustomException(
+                ErrorCode.KIS_REQUEST_FAIL,
+                details={"print_error": api_response.print_error()},
+            )
 
     def get_send_data(self, cmd=None, stockcode=None):
         # 입력값 체크 step
@@ -95,54 +142,42 @@ class KoreaInvestApi:
         assert 0 < cmd < 9, f"Wrong Input Data: {cmd}"
 
         # 입력값에 따라 전송 데이터셋 구분 처리
-        if cmd == 1: # 주식 호가 등록
+        if cmd == 1:  # 주식 호가 등록
             tr_id = 'H0STASP0'
             tr_type = '1'
-        elif cmd == 2: # 주식 호가 등록 해제
+        elif cmd == 2:  # 주식 호가 등록 해제
             tr_id = 'H0STASP0'
             tr_type = '2'
-        if cmd == 3: # 주식 체결 등록
+        elif cmd == 3:  # 주식 체결 등록
             tr_id = 'H0STCNT0'
             tr_type = '1'
-        elif cmd == 4: # 주식 체결 등록 해제
+        elif cmd == 4:  # 주식 체결 등록 해제
             tr_id = 'H0STCNT0'
             tr_type = '2'
-        if cmd == 5: # 주식 체결 통보 등록 (고객용)
-            tr_id = 'H0STCNI0' # 고객 체결 통보
+        elif cmd == 5:  # 주식 체결 통보 등록 (고객용)
+            tr_id = 'H0STCNI0'
             tr_type = '1'
-        elif cmd == 6: # 주식 체결 통보 등록 해제 (고객용)
-            tr_id = 'H0STCNI0' # 고객 체결 통보
+        elif cmd == 6:  # 주식 체결 통보 등록 해제 (고객용)
+            tr_id = 'H0STCNI0'
             tr_type = '2'
-        if cmd == 7: # 주식 체결 통보 등록 (모의)
-            tr_id = 'H0STCNI9' # 테스트용 직원 체결 통보
+        elif cmd == 7:  # 주식 체결 통보 등록 (모의)
+            tr_id = 'H0STCNI9'
             tr_type = '1'
-        elif cmd == 8: # 주식 체결 통보 등록 해제 (모의)
-            tr_id = 'H0STCNI9' # 테스트용 직원 체결 통보
+        elif cmd == 8:  # 주식 체결 통보 등록 해제 (모의)
+            tr_id = 'H0STCNI9'
             tr_type = '2'
 
-        # send json, 체결 통보는 tr_key 입력 항목이 상이하므로 분리
-        if cmd in (5,6,7,8):
-            senddata = (
-                f'{{"header":{{'
-                f'"approval_key":"{self.websocket_approval_key}", '
-                f'"custtype":"{self.cust_type}", '
-                f'"tr_type":"{tr_type}", '
-                f'"content-type":"utf-8"}}, '
-                f'"body":{{"input":{{'
-                f'"tr_id":"{tr_id}", '
-                f'"tr_key":"{self.hts_id}"}}}}}}'
-            )
-        else:
-            senddata = (
-                f'{{"header":{{'
-                f'"approval_key":"{self.websocket_approval_key}", '
-                f'"custtype":"{self.cust_type}", '
-                f'"tr_type":"{tr_type}", '
-                f'"content-type":"utf-8"}}, '
-                f'"body":{{"input":{{'
-                f'"tr_id":"{tr_id}", '
-                f'"tr_key":"{stockcode}"}}}}}}'
-            )
+        # JSON 생성
+        senddata = (
+            f'{{"header":{{'
+            f'"approval_key":"{self.websocket_approval_key}", '
+            f'"custtype":"{self.cust_type}", '
+            f'"tr_type":"{tr_type}", '
+            f'"content-type":"utf-8"}}, '
+            f'"body":{{"input":{{'
+            f'"tr_id":"{tr_id}", '
+            f'"tr_key":"{self.hts_id if cmd in (5, 6, 7, 8) else stockcode}"}}}}}}'
+        )
 
         return senddata
 
@@ -192,10 +227,7 @@ class KisApiResponse:
 
     def is_ok(self):
         try:
-            if self.get_body().rt_cd == '0':
-                return True
-            else:
-                return False
+            return self.get_body().rt_cd == '0'
         except:
             return False
 
@@ -214,25 +246,4 @@ class KisApiResponse:
             logger.info(f'\t-{x}: {getattr(self.get_body(), x)}')
 
     def print_error(self):
-        logger.info(f'------------------------------')
-        logger.info(f'Error in response: {self.get_result_code()}')
-        logger.info(f'{self.get_body().rt_cd}, {self.get_error_code()}, {self.get_error_message()}')
-        logger.info(f'------------------------------')
-
-    def to_api_response_dto(self):
-        """API 응답을 CommonResponseDto 형식으로 변환합니다.
-
-        Returns:
-            CommonResponseDto: 응답 데이터를 포함한 공통 응답 DTO
-
-        Raises:
-            BaseCustomException: API 요청 실패 예외
-        """
-        if self.is_ok():
-            self.print_all()
-            return CommonResponseDto(result = self.get_body().output)
-        else:
-            raise BaseCustomException(
-                ErrorCode.KIS_REQUEST_FAIL,
-                details = {"print_error": self.print_error()}
-            )
+        return f"{self.get_error_code()}:{self.get_error_message()}"

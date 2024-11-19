@@ -7,22 +7,11 @@ def custom_openapi(app: FastAPI):
         return app.openapi_schema
 
     openapi_schema = get_openapi(
-        title = "FLEX 주식 API",
+        title = "FLEX KIS 주식 데이터 API",
         version = "1.0",
         routes = app.routes,
     )
 
-    openapi_schema["components"]["securitySchemes"] = {
-        "bearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-            "in": "header",
-            "name": "Authorization"
-        }
-    }
-
-    openapi_schema["security"] = [{"bearerAuth": []}]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
