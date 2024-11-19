@@ -58,6 +58,19 @@ async def get_inquire_price(stock_code: str):
     return korea_invest_client.get_inquire_price(stock_code)
 
 
+@stock_router.get(
+    "/daily/trade-volume",
+    summary="종목별 일별 매수 & 매도 체결량 API 요청 (종목별일별매수매도체결량 [v1_국내주식-056] - 모의투자 미지원)",
+    description="Retrieve the latest price information for a specific stock using its stock code."
+)
+async def get_daily_trade_volume(
+    request: DailyTradeVolumeReq = Body(...)
+):
+    config['is_paper_trading'] = False
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return korea_invest_client.get_daily_trade_volume(request)
+
+
 korea_invest_client = KoreaInvestRestClient(config, base_headers)
 websocket_url = config['paper_websocket_url'] if config['is_paper_trading'] else config['websocket_url']
 korea_invest_websocket = KoreaInvestWebSocketClient(korea_invest_client, websocket_url)
