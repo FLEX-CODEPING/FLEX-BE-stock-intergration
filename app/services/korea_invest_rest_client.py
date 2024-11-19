@@ -50,3 +50,31 @@ class KoreaInvestRestClient(KoreaInvestApi):
         }
 
         return self._url_fetch(url, tr_id, params)
+
+
+    def get_ranking_fluctuation(self, request: RankingFluctuationReq):
+        """국내 주식 등락률 순위 API 요청.
+
+            Note: 국내 주식 등락률 순위[v1_국내주식-088]
+        """
+        url = "/uapi/domestic-stock/v1/ranking/fluctuation"
+        tr_id = "FHPST01700000"
+
+        params = params = {
+            'fid_rsfl_rate2': request.fluctuation_rate_max,
+            'fid_cond_mrkt_div_code': 'J',
+            'fid_cond_scr_div_code': '20170',
+            'fid_input_iscd': request.market_code,
+            'fid_rank_sort_cls_code': request.sort_order,
+            'fid_input_cnt_1': request.result_limit,
+            'fid_prc_cls_code': request.price_type,
+            'fid_input_price_1': request.price_min,
+            'fid_input_price_2': request.price_max,
+            'fid_vol_cnt': request.volume_threshold,
+            'fid_trgt_cls_code': request.target_type,
+            'fid_trgt_exls_cls_code': request.exclude_type,
+            'fid_div_cls_code': request.category_type,
+            'fid_rsfl_rate1': request.fluctuation_rate_min
+        }
+
+        return self._url_fetch(url, tr_id, params)
