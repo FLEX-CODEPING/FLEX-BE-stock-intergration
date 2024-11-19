@@ -84,6 +84,19 @@ async def get_ranking_fluctuation(
     return korea_invest_client.get_ranking_fluctuation(request)
 
 
+@stock_router.get(
+    "/daily/item-chart-price",
+    summary="국내 주식 기간별 시세 (일/주/월/년) API 요청 (국내주식기간별시세(일/주/월/년)[v1_국내주식-016])",
+    description="Retrieve the latest price information for a specific stock using its stock code."
+)
+async def get_daily_item_chart_price(
+    request: DailyItemChartPriceReq = Body(...)
+):
+    config['is_paper_trading'] = True
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return korea_invest_client.get_daily_item_chart_price(request)
+
+
 korea_invest_client = KoreaInvestRestClient(config, base_headers)
 websocket_url = config['paper_websocket_url'] if config['is_paper_trading'] else config['websocket_url']
 korea_invest_websocket = KoreaInvestWebSocketClient(korea_invest_client, websocket_url)
