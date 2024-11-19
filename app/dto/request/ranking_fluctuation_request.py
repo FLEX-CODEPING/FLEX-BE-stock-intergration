@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-class RankingFluctuationRequest(BaseModel):
+class RankingFluctuationReq(BaseModel):
     market_code: str = Field(
         "",
         description=("입력 종목코드. \n"
