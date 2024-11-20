@@ -23,25 +23,6 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                script {
-                    slackSend(channel: SLACK_CHANNEL, message: "🏗️ STOCK-INTEGRATION Build #${env.BUILD_NUMBER} is starting...")
-                    sh 'pip install --no-cache-dir -r requirements.txt'
-                }
-            }
-            post {
-                success {
-                    echo 'STOCK-INTEGRATION build success'
-                    slackSend(channel: SLACK_CHANNEL, message: "✅ STOCK-INTEGRATION build SUCCEED for Build #${env.BUILD_NUMBER}.")
-                }
-                failure {
-                    echo 'STOCK-INTEGRATION build failed'
-                    slackSend(channel: SLACK_CHANNEL, message: "⛔️ STOCK-INTEGRATION build FAILED for Build #${env.BUILD_NUMBER}.")
-                }
-            }
-        }
-
         stage('Docker Build & Push') {
             steps {
                 script {
@@ -68,9 +49,9 @@ pipeline {
                                 # Update docker-compose file with new image tag
                                 sed -i "s|image: ${IMAGE_NAME}:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" docker-compose-stock-integration.yml
 
-                                docker compose -f docker-compose-python.yml pull
-                                docker compose -f docker-compose-python.yml up -d
-                                docker compose -f docker-compose-python.yml ps
+                                docker compose -f docker-compose-stock-integration.yml pull
+                                docker compose -f docker-compose-stock-integration.yml up -d
+                                docker compose -f docker-compose-stock-integration.yml ps
                             '
                         """
                         slackSend(channel: SLACK_CHANNEL, message: "🚀 STOCK-INTEGRATION Deployment SUCCEED for Build #${env.BUILD_NUMBER}.")
@@ -83,7 +64,7 @@ pipeline {
                     echo "Deployment completed successfully."
                 }
                 failure {
-                    slackSend(channel: SLACK_CHANNEL, message: "⛔️ PythSTOCK-INTEGRATIONon Deployment FAILED for Build #${env.BUILD_NUMBER}.")
+                    slackSend(channel: SLACK_CHANNEL, message: "⛔️ STOCK-INTEGRATION Deployment FAILED for Build #${env.BUILD_NUMBER}.")
                 }
             }
         }
