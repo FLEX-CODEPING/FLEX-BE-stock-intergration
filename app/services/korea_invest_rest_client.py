@@ -12,7 +12,7 @@ from app.utils.korea_invest_api import KoreaInvestApi
 from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
 from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
-
+from app.dto.request.volume_rank_request import VolumeRankingReq
 
 class KoreaInvestRestClient(KoreaInvestApi):
 
@@ -95,6 +95,33 @@ class KoreaInvestRestClient(KoreaInvestApi):
             'FID_INPUT_DATE_2': request.date_to,
             'FID_PERIOD_DIV_CODE': request.period_div_code,
             'FID_ORG_ADJ_PRC': request.org_adj_price,
+        }
+
+        return self._url_fetch(url, tr_id, params)
+    
+    def get_volume_ranking(self, request: VolumeRankingReq):
+        """국내주식 거래량순위 API 요청.
+
+            Note: 거래량순위 [v1_국내주식-047]
+            최대 30건 확인 가능하며, 다음 조회가 불가함.
+        """
+
+        url = "/uapi/domestic-stock/v1/quotations/volume-rank"
+        tr_id = "FHPST01710000"
+
+        params = {
+            'FID_COND_MRKT_DIV_CODE': 'J',
+            'FID_COND_SCR_DIV_CODE': '20171',
+            'FID_INPUT_ISCD': request.input_stock_code,
+            'FID_DIV_CLS_CODE': request.class_code,
+            'FID_BLNG_CLS_CODE': request.belong_code,
+            'FID_TRGT_CLS_CODE': request.target_code,
+            'FID_TRGT_EXLS_CLS_CODE': request.target_exclusion_code,
+            'FID_INPUT_PRICE_1': request.input_price_min,
+            'FID_INPUT_PRICE_2': request.input_price_max,
+            'FID_VOL_CNT': request.volume_count,
+            'FID_INPUT_DATE_1': ""
+            #'FID_INPUT_DATE_1': request.input_date_start
         }
 
         return self._url_fetch(url, tr_id, params)
