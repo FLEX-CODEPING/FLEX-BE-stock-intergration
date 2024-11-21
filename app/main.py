@@ -11,7 +11,7 @@ from app.services.korea_invest_ws_client import KoreaInvestWebSocketClient
 from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
 from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
-
+from app.dto.request.ranking_volume_request import VolumeRankingReq
 
 app = FastAPI(
     docs_url = "/api/stock-service/swagger-ui.html",
@@ -35,7 +35,6 @@ app.add_middleware(
 )
 
 setup_swagger(app)
-security = HTTPBearer()
 
 with open("./app/config/config.yaml", encoding = 'UTF-8') as f:
     config = yaml.safe_load(f)
@@ -83,6 +82,16 @@ async def get_ranking_fluctuation(
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
     return korea_invest_client.get_ranking_fluctuation(request)
 
+@stock_router.get(
+    "/ranking/volume",
+    summary="국내주식 거래량순위 API 요청 (거래량순위 [v1_국내주식-047])"
+)
+async def get_volume_ranking(
+    request: VolumeRankingReq = Body(...)
+):
+    config['is_paper_trading'] = False
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return korea_invest_client.get_volume_ranking(request)
 
 @stock_router.get(
     "/daily/item-chart-price",
