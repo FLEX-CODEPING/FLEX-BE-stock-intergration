@@ -112,16 +112,16 @@ class KoreaInvestRestClient(KoreaInvestApi):
         params = {
             'FID_COND_MRKT_DIV_CODE': 'J',
             'FID_COND_SCR_DIV_CODE': '20171',
-            'FID_INPUT_ISCD': request.input_stock_code,
-            'FID_DIV_CLS_CODE': request.class_code,
-            'FID_BLNG_CLS_CODE': request.belong_code,
-            'FID_TRGT_CLS_CODE': request.target_code,
-            'FID_TRGT_EXLS_CLS_CODE': request.target_exclusion_code,
-            'FID_INPUT_PRICE_1': request.input_price_min,
-            'FID_INPUT_PRICE_2': request.input_price_max,
-            'FID_VOL_CNT': request.volume_count,
+            'FID_INPUT_ISCD': request.inputStockCode,
+            'FID_DIV_CLS_CODE': request.classCode,
+            'FID_BLNG_CLS_CODE': request.belongCode,
+            'FID_TRGT_CLS_CODE': request.targetCode,
+            'FID_TRGT_EXLS_CLS_CODE': request.targetExclusionCode,
+            'FID_INPUT_PRICE_1': request.inputPriceMin,
+            'FID_INPUT_PRICE_2': request.inputPriceMax,
+            'FID_VOL_CNT': request.volumeCount,
             'FID_INPUT_DATE_1': ""
-            #'FID_INPUT_DATE_1': request.input_date_start
+            #'FID_INPUT_DATE_1': request.inputDateStart
         }
 
         return self._url_fetch(url, tr_id, params)
