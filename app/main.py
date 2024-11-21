@@ -11,7 +11,7 @@ from app.services.korea_invest_ws_client import KoreaInvestWebSocketClient
 from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
 from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
-
+from app.dto.request.volume_rank_request import VolumeRankingReq
 
 app = FastAPI(
     docs_url = "/api/stock-service/swagger-ui.html",
@@ -35,7 +35,6 @@ app.add_middleware(
 )
 
 setup_swagger(app)
-security = HTTPBearer()
 
 with open("./app/config/config.yaml", encoding = 'UTF-8') as f:
     config = yaml.safe_load(f)
@@ -44,11 +43,11 @@ env_config = KoreaInvestEnv(config)
 base_headers = env_config.get_base_headers()
 config = env_config.get_full_config()
 
-stock_router = APIRouter(prefix = "/api/kis/stocks", tags = ["stock"])
+stock_router = APIRouter(prefix = "/api/kisOpenApi", tags = ["stock"])
 
 
 @stock_router.get(
-    "/{stock_code}/inquire-price",
+    "/{stock_code}/inquirePrice",
     summary="주식 현재가 시세 API 요청",
     description="Retrieve the latest price information for a specific stock using its stock code."
 )
@@ -59,7 +58,7 @@ async def get_inquire_price(stock_code: str):
 
 
 @stock_router.get(
-    "/daily/trade-volume",
+    "/daily/tradeVolume",
     summary="종목별 일별 매수 & 매도 체결량 API 요청 (종목별일별매수매도체결량 [v1_국내주식-056] - 모의투자 미지원)",
     description="Retrieve the latest price information for a specific stock using its stock code."
 )
@@ -83,9 +82,19 @@ async def get_ranking_fluctuation(
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
     return korea_invest_client.get_ranking_fluctuation(request)
 
+@stock_router.get(
+    "/ranking/volume",
+    summary="국내주식 거래량순위 API 요청 (거래량순위 [v1_국내주식-047])"
+)
+async def get_volume_ranking(
+    request: VolumeRankingReq = Body(...)
+):
+    config['is_paper_trading'] = False
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return korea_invest_client.get_volume_ranking(request)
 
 @stock_router.get(
-    "/daily/item-chart-price",
+    "/daily/itemChartPrice",
     summary="국내 주식 기간별 시세 (일/주/월/년) API 요청 (국내주식기간별시세(일/주/월/년)[v1_국내주식-016])",
     description="Retrieve the latest price information for a specific stock using its stock code."
 )
@@ -106,7 +115,7 @@ korea_invest_websocket = KoreaInvestWebSocketClient(korea_invest_client, websock
 async def startup_event():
     asyncio.create_task(korea_invest_websocket.run())
 
-@app.websocket("/api/stocks/{stock_code}/real-time")
+@app.websocket("/api/stocks/{stock_code}/realTime")
 async def websocket_endpoint(websocket: WebSocket, stock_code: str):
     await websocket.accept()
     try:
