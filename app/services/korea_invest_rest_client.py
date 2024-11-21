@@ -12,7 +12,8 @@ from app.utils.korea_invest_api import KoreaInvestApi
 from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
 from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
-from app.dto.request.volume_rank_request import VolumeRankingReq
+from app.dto.request.ranking_volume_request import VolumeRankingReq
+from app.dto.mapper.ranking_volume_response_mapper import RankingVolumeResMapper
 
 class KoreaInvestRestClient(KoreaInvestApi):
 
@@ -123,5 +124,6 @@ class KoreaInvestRestClient(KoreaInvestApi):
             'FID_INPUT_DATE_1': ""
             #'FID_INPUT_DATE_1': request.inputDateStart
         }
+        target_columns, output_columns = RankingVolumeResMapper().get_columns()
 
-        return self._url_fetch(url, tr_id, params)
+        return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)

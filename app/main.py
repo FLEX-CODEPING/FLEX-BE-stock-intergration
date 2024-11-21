@@ -11,7 +11,7 @@ from app.services.korea_invest_ws_client import KoreaInvestWebSocketClient
 from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
 from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
-from app.dto.request.volume_rank_request import VolumeRankingReq
+from app.dto.request.ranking_volume_request import VolumeRankingReq
 
 app = FastAPI(
     docs_url = "/api/stock-service/swagger-ui.html",
