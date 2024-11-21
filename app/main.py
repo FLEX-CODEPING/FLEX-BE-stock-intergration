@@ -11,12 +11,14 @@ from app.services.korea_invest_ws_client import KoreaInvestWebSocketClient
 from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
 from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
-
+from app.config.eureka_client import eureka_lifespan
 
 app = FastAPI(
+    lifespan=eureka_lifespan,
     docs_url = "/api/stock-service/swagger-ui.html",
     openapi_url = "/api/stock-service/openapi.json",
-    title = "KIS Stock Data Controller"
+    redoc_url="/api/stock-service/redoc",
+    title = "Stock Data Integration Controller"
 )
 
 origins = [
@@ -37,7 +39,7 @@ app.add_middleware(
 setup_swagger(app)
 security = HTTPBearer()
 
-with open("./app/config/config.yaml", encoding = 'UTF-8') as f:
+with open("./app/config/config_kis.yaml", encoding = 'UTF-8') as f:
     config = yaml.safe_load(f)
 
 env_config = KoreaInvestEnv(config)
@@ -45,6 +47,12 @@ base_headers = env_config.get_base_headers()
 config = env_config.get_full_config()
 
 stock_router = APIRouter(prefix = "/api/kis/stocks", tags = ["stock"])
+
+
+@app.get("/health")
+async def health_check():
+    logger.info("Handling health check request")
+    return {"status": "UP"}
 
 
 @stock_router.get(
