@@ -15,9 +15,9 @@ from app.config.eureka_client import eureka_lifespan
 
 app = FastAPI(
     lifespan=eureka_lifespan,
-    docs_url = "/api/stock-service/swagger-ui.html",
-    openapi_url = "/api/stock-service/openapi.json",
-    redoc_url="/api/stock-service/redoc",
+    docs_url = "/api/stock-integration-service/swagger-ui.html",
+    openapi_url = "/api/stock-integration-service/openapi.json",
+    redoc_url="/api/stock-integration-service/redoc",
     title = "Stock Data Integration Controller"
 )
 
@@ -39,23 +39,23 @@ app.add_middleware(
 setup_swagger(app)
 security = HTTPBearer()
 
-with open("./app/config/config_kis.yaml", encoding = 'UTF-8') as f:
+with open("./config_kis.yaml", encoding = 'UTF-8') as f:
     config = yaml.safe_load(f)
 
 env_config = KoreaInvestEnv(config)
 base_headers = env_config.get_base_headers()
 config = env_config.get_full_config()
 
-stock_router = APIRouter(prefix = "/api/kis/stocks", tags = ["stock"])
+stock_kis_integration_router = APIRouter(prefix ="/api/kis/stocks", tags = ["stock"])
 
 
-@app.get("/health")
+@app.get("/health", include_in_schema=False)
 async def health_check():
     logger.info("Handling health check request")
     return {"status": "UP"}
 
 
-@stock_router.get(
+@stock_kis_integration_router.get(
     "/{stock_code}/inquire-price",
     summary="주식 현재가 시세 API 요청",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -66,7 +66,7 @@ async def get_inquire_price(stock_code: str):
     return korea_invest_client.get_inquire_price(stock_code)
 
 
-@stock_router.get(
+@stock_kis_integration_router.get(
     "/daily/trade-volume",
     summary="종목별 일별 매수 & 매도 체결량 API 요청 (종목별일별매수매도체결량 [v1_국내주식-056] - 모의투자 미지원)",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -79,7 +79,7 @@ async def get_daily_trade_volume(
     return korea_invest_client.get_daily_trade_volume(request)
 
 
-@stock_router.get(
+@stock_kis_integration_router.get(
     "/ranking/fluctuation",
     summary="국내 주식 등락률 순위 API 요청 (국내 주식 등락률 순위[v1_국내주식-088])",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -92,7 +92,7 @@ async def get_ranking_fluctuation(
     return korea_invest_client.get_ranking_fluctuation(request)
 
 
-@stock_router.get(
+@stock_kis_integration_router.get(
     "/daily/item-chart-price",
     summary="국내 주식 기간별 시세 (일/주/월/년) API 요청 (국내주식기간별시세(일/주/월/년)[v1_국내주식-016])",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -128,4 +128,4 @@ async def websocket_endpoint(websocket: WebSocket, stock_code: str):
     except WebSocketDisconnect:
         logger.info(f"Client disconnected for stock {stock_code}")
 
-app.include_router(stock_router)
+app.include_router(stock_kis_integration_router)

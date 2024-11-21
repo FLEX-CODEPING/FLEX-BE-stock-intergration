@@ -1,4 +1,4 @@
 # Env & Config
-/app/config/config_kis.yaml
+/config_kis.yaml
 /.env.local
 /.env.dev
