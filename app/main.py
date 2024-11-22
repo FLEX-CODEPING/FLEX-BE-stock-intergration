@@ -12,6 +12,7 @@ from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
 from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
 from app.config.eureka_client import eureka_lifespan
+from app.dto.request.ranking_volume_request import VolumeRankingReq
 
 app = FastAPI(
     lifespan=eureka_lifespan,
@@ -103,6 +104,18 @@ async def get_daily_item_chart_price(
     config['is_paper_trading'] = True
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
     return korea_invest_client.get_daily_item_chart_price(request)
+
+
+@stock_kis_integration_router.get(
+    "/ranking/volume",
+    summary="국내주식 거래량순위 API 요청 (거래량순위 [v1_국내주식-047])"
+)
+async def get_volume_ranking(
+    request: VolumeRankingReq = Body(...)
+):
+    config['is_paper_trading'] = False
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return korea_invest_client.get_volume_ranking(request)
 
 
 korea_invest_client = KoreaInvestRestClient(config, base_headers)
