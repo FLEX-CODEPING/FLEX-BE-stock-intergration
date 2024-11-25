@@ -10,7 +10,7 @@ pipeline {
         BASTION_HOST = credentials('bastion-host')
         REMOTE_HOST = credentials('dev-stock-integration-host')
         SLACK_CHANNEL = '#backend-jenkins'
-        IMAGE_NAME = "${DOCKER_USERNAME}/flex-stock-integration-service"
+        IMAGE_NAME = "${DOCKER_USERNAME}/flex-be-stock-integration"
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
