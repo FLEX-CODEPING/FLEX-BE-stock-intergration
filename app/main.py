@@ -11,6 +11,8 @@ from app.services.korea_invest_ws_client import KoreaInvestWebSocketClient
 from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
 from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
+from app.dto.request.income_statement_request import IncomeStatementReq
+from app.dto.request.balance_sheet_request import BalanceSheetReq
 from app.config.eureka_client import eureka_lifespan
 from app.dto.request.ranking_volume_request import VolumeRankingReq
 
@@ -56,7 +58,7 @@ async def health_check():
     return {"status": "UP"}
 
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/{stock_code}/inquire-price",
     summary="주식 현재가 시세 API 요청",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -67,7 +69,7 @@ async def get_inquire_price(stock_code: str):
     return korea_invest_client.get_inquire_price(stock_code)
 
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/daily/trade-volume",
     summary="종목별 일별 매수 & 매도 체결량 API 요청 (종목별일별매수매도체결량 [v1_국내주식-056] - 모의투자 미지원)",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -80,7 +82,7 @@ async def get_daily_trade_volume(
     return korea_invest_client.get_daily_trade_volume(request)
 
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/ranking/fluctuation",
     summary="국내 주식 등락률 순위 API 요청 (국내 주식 등락률 순위[v1_국내주식-088])",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -93,7 +95,7 @@ async def get_ranking_fluctuation(
     return korea_invest_client.get_ranking_fluctuation(request)
 
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/daily/item-chart-price",
     summary="국내 주식 기간별 시세 (일/주/월/년) API 요청 (국내주식기간별시세(일/주/월/년)[v1_국내주식-016])",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -106,7 +108,7 @@ async def get_daily_item_chart_price(
     return korea_invest_client.get_daily_item_chart_price(request)
 
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/ranking/volume",
     summary="국내주식 거래량순위 API 요청 (거래량순위 [v1_국내주식-047])"
 )
@@ -117,6 +119,27 @@ async def get_volume_ranking(
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
     return korea_invest_client.get_volume_ranking(request)
 
+@stock_kis_integration_router.post(
+    "/balance-sheet",
+    summary="국내주식 대차대조표 API 요청 (국내주식 대차대조표[v1_국내주식-078])"
+)
+async def get_volume_ranking(
+    request: BalanceSheetReq = Body(...)
+):
+    config['is_paper_trading'] = False
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return korea_invest_client.get_stock_income_statement(request)
+
+@stock_kis_integration_router.post(
+    "/income-statement",
+    summary="국내주식 손익계산서 API 요청 (국내주식 손익계산서[v1_국내주식-079])"
+)
+async def get_volume_ranking(
+    request: IncomeStatementReq = Body(...)
+):
+    config['is_paper_trading'] = False
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return korea_invest_client.get_stock_income_statement(request)
 
 korea_invest_client = KoreaInvestRestClient(config, base_headers)
 websocket_url = config['paper_websocket_url'] if config['is_paper_trading'] else config['websocket_url']

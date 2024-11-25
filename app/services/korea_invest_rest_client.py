@@ -13,7 +13,10 @@ from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
 from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
 from app.dto.request.ranking_volume_request import VolumeRankingReq
+from app.dto.request.balance_sheet_request import BalanceSheetReq
 from app.dto.mapper.ranking_volume_response_mapper import RankingVolumeResMapper
+from app.dto.mapper.income_statement_response_mapper import IncomeStatementResMapper
+from app.dto.mapper.balance_shhet_response_mapper import BalanceSheetResMapper
 
 class KoreaInvestRestClient(KoreaInvestApi):
 
@@ -113,17 +116,55 @@ class KoreaInvestRestClient(KoreaInvestApi):
         params = {
             'FID_COND_MRKT_DIV_CODE': 'J',
             'FID_COND_SCR_DIV_CODE': '20171',
-            'FID_INPUT_ISCD': request.inputStockCode,
+            'FID_INPUT_ISCD': request.stockCode,
             'FID_DIV_CLS_CODE': request.classCode,
             'FID_BLNG_CLS_CODE': request.belongCode,
             'FID_TRGT_CLS_CODE': request.targetCode,
-            'FID_TRGT_EXLS_CLS_CODE': request.targetExclusionCode,
-            'FID_INPUT_PRICE_1': request.inputPriceMin,
-            'FID_INPUT_PRICE_2': request.inputPriceMax,
-            'FID_VOL_CNT': request.volumeCount,
+            'FID_TRGT_EXLS_CLS_CODE': request.targetExcsCode,
+            'FID_INPUT_PRICE_1': request.priceMin,
+            'FID_INPUT_PRICE_2': request.priceMax,
+            'FID_VOL_CNT': request.volCount,
             'FID_INPUT_DATE_1': ""
             #'FID_INPUT_DATE_1': request.inputDateStart
         }
         target_columns, output_columns = RankingVolumeResMapper().get_columns()
+
+        return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+    
+    def get_stock_income_statement(self, request: VolumeRankingReq):
+        """국내주식 손익계산서 API 요청.
+
+            Note: 국내주식 손익계산서[v1_국내주식-079]
+        """
+
+        url = "/uapi/domestic-stock/v1/finance/income-statement"
+        tr_id = "FHKST66430200"
+
+        params = {
+            'FID_COND_MRKT_DIV_CODE': 'J',
+            'FID_INPUT_ISCD': request.stockCode,
+            'FID_DIV_CLS_CODE': request.classCode
+        }
+
+        target_columns, output_columns = IncomeStatementResMapper().get_columns()
+
+        return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+
+    def get_stock_balance_sheet(self, request: BalanceSheetReq):
+        """국내주식 대차대조표 API 요청.
+
+            Note: 국내주식 대차대조표[v1_국내주식-078]
+        """
+
+        url = "/uapi/domestic-stock/v1/finance/balance-sheet"
+        tr_id = "FHKST66430100"
+
+        params = {
+            'FID_COND_MRKT_DIV_CODE': 'J',
+            'FID_INPUT_ISCD': request.stockCode,
+            'FID_DIV_CLS_CODE': request.classCode
+        }
+
+        target_columns, output_columns = BalanceSheetResMapper().get_columns()
 
         return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
