@@ -1,4 +1,4 @@
-class IncomeStatementMapper:
+class IncomeStatementResMapper:
     def __init__(self):
         self.target_columns = [
             "stac_yymm",  # settlementYearMonth

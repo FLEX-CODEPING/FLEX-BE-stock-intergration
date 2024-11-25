@@ -120,10 +120,10 @@ class KoreaInvestRestClient(KoreaInvestApi):
             'FID_DIV_CLS_CODE': request.classCode,
             'FID_BLNG_CLS_CODE': request.belongCode,
             'FID_TRGT_CLS_CODE': request.targetCode,
-            'FID_TRGT_EXLS_CLS_CODE': request.targetExclusionCode,
-            'FID_INPUT_PRICE_1': request.inputPriceMin,
-            'FID_INPUT_PRICE_2': request.inputPriceMax,
-            'FID_VOL_CNT': request.volumeCount,
+            'FID_TRGT_EXLS_CLS_CODE': request.targetExcsCode,
+            'FID_INPUT_PRICE_1': request.priceMin,
+            'FID_INPUT_PRICE_2': request.priceMax,
+            'FID_VOL_CNT': request.volCount,
             'FID_INPUT_DATE_1': ""
             #'FID_INPUT_DATE_1': request.inputDateStart
         }
