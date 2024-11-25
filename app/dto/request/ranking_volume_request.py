@@ -13,7 +13,7 @@ class VolumeRankingReq(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "stockCode": "005930",
+                "stockCode": "0000",
                 "classCode": "0",
                 "belongCode" : "0",
                 "targetCode" : "111111111",
