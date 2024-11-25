@@ -19,7 +19,7 @@ class KoreaInvestEnv:
     """KoreaInvestEnv class 는 한국투자증권 open API 호출을 위한 환경변수를 초기화하고 접속 토큰 및 키를 요청합니다.
 
     Attributes:
-        config (dict): config.yaml 정보
+        config (dict): config_kis.yaml 정보
         cust_type (str): 고객 타입
         base_headers (dict): 모든 API 요청에 사용할 기본 헤더 설정
 
