@@ -57,7 +57,7 @@ async def health_check():
     return {"status": "UP"}
 
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/{stock_code}/inquire-price",
     summary="주식 현재가 시세 API 요청",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -68,7 +68,7 @@ async def get_inquire_price(stock_code: str):
     return korea_invest_client.get_inquire_price(stock_code)
 
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/daily/trade-volume",
     summary="종목별 일별 매수 & 매도 체결량 API 요청 (종목별일별매수매도체결량 [v1_국내주식-056] - 모의투자 미지원)",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -81,7 +81,7 @@ async def get_daily_trade_volume(
     return korea_invest_client.get_daily_trade_volume(request)
 
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/ranking/fluctuation",
     summary="국내 주식 등락률 순위 API 요청 (국내 주식 등락률 순위[v1_국내주식-088])",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -94,7 +94,7 @@ async def get_ranking_fluctuation(
     return korea_invest_client.get_ranking_fluctuation(request)
 
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/daily/item-chart-price",
     summary="국내 주식 기간별 시세 (일/주/월/년) API 요청 (국내주식기간별시세(일/주/월/년)[v1_국내주식-016])",
     description="Retrieve the latest price information for a specific stock using its stock code."
@@ -107,7 +107,7 @@ async def get_daily_item_chart_price(
     return korea_invest_client.get_daily_item_chart_price(request)
 
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/ranking/volume",
     summary="국내주식 거래량순위 API 요청 (거래량순위 [v1_국내주식-047])"
 )
@@ -118,7 +118,7 @@ async def get_volume_ranking(
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
     return korea_invest_client.get_volume_ranking(request)
 
-@stock_kis_integration_router.get(
+@stock_kis_integration_router.post(
     "/income-statement",
     summary="국내주식 손익계산서 API 요청 (국내주식 손익계산서[v1_국내주식-079])"
 )

@@ -7,8 +7,6 @@ class IncomeStatementMapper:
             "sale_totl_prfi",  # grossProfit
             "bsop_prti",  # operatingProfit
             "op_prfi",  # ordinaryProfit
-            "spec_prfi",  # extraordinaryGains
-            "spec_loss",  # extraordinaryLosses
             "thtr_ntin"  # netIncomeForThePeriod
         ]
         
@@ -19,8 +17,6 @@ class IncomeStatementMapper:
             "grossProfit",
             "operatingProfit",
             "ordinaryProfit",
-            "extraordinaryGains",
-            "extraordinaryLosses",
             "netIncomeForThePeriod"
         ]
 
