@@ -12,6 +12,7 @@ from app.dto.request.ranking_fluctuation_request import RankingFluctuationReq
 from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
 from app.dto.request.income_statement_request import IncomeStatementReq
+from app.dto.request.balance_sheet_request import BalanceSheetReq
 from app.config.eureka_client import eureka_lifespan
 from app.dto.request.ranking_volume_request import VolumeRankingReq
 
@@ -117,6 +118,17 @@ async def get_volume_ranking(
     config['is_paper_trading'] = False
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
     return korea_invest_client.get_volume_ranking(request)
+
+@stock_kis_integration_router.post(
+    "/balance-sheet",
+    summary="국내주식 대차대조표 API 요청 (국내주식 대차대조표[v1_국내주식-078])"
+)
+async def get_volume_ranking(
+    request: BalanceSheetReq = Body(...)
+):
+    config['is_paper_trading'] = False
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return korea_invest_client.get_stock_income_statement(request)
 
 @stock_kis_integration_router.post(
     "/income-statement",
