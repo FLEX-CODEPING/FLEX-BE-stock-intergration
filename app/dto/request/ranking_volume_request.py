@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 class VolumeRankingReq(BaseModel):
-    inputStockCode: str = Field(..., description="필수> 입력 종목코드 (0000: 전체, 기타: 업종코드)", max_length=12)
+    stockCode: str = Field(..., description="필수> 입력 종목코드 (0000: 전체, 기타: 업종코드)", max_length=12)
     classCode: str = Field(..., description="필수> 분류 구분 코드 (0: 전체, 1: 보통주, 2: 우선주)", max_length=2)
     belongCode: str = Field(..., description="필수> 소속 구분 코드", max_length=2)
     targetCode: str = Field(..., description="필수> 대상 구분 코드", max_length=32)
