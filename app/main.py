@@ -15,6 +15,7 @@ from app.dto.request.income_statement_request import IncomeStatementReq
 from app.dto.request.balance_sheet_request import BalanceSheetReq
 from app.config.eureka_client import eureka_lifespan
 from app.dto.request.ranking_volume_request import VolumeRankingReq
+from app.dto.request.ranking_market_cap_request import MarketCapRankingReq
 
 app = FastAPI(
     lifespan=eureka_lifespan,
@@ -108,7 +109,6 @@ async def get_ranking_fluctuation(
     return korea_invest_client.get_ranking_fluctuation(request)
 
 
-
 @stock_kis_integration_ranking_router.post(
     "/volume",
     summary="국내주식 거래량순위 API 요청 (거래량순위 [v1_국내주식-047])"
@@ -119,6 +119,18 @@ async def get_volume_ranking(
     config['is_paper_trading'] = False
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
     return korea_invest_client.get_volume_ranking(request)
+
+@stock_kis_integration_ranking_router.post(
+    "/market-cap",
+    summary="국내주식 시가총액 상위 API 요청 (국내주식 시가총액 상위[v1_국내주식-091])"
+)
+async def get_makret_cap_ranking(
+    request: MarketCapRankingReq = Body(...)
+):
+    config['is_paper_trading'] = False
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return korea_invest_client.get_makret_cap_ranking(request)
+
 
 @stock_kis_integration_sheet_router.post(
     "/balance-sheet",

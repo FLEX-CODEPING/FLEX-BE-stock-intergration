@@ -171,7 +171,7 @@ class KoreaInvestRestClient(KoreaInvestApi):
 
         return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
     
-    def get_stock_balance_sheet(self, request: MarketCapRankingReq):
+    def get_makret_cap_ranking(self, request: MarketCapRankingReq):
         """국내주식 시가총액 상위 API 요청.
 
             Note: 국내주식 시가총액 상위[v1_국내주식-091]
