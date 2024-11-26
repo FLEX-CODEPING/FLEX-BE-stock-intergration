@@ -50,9 +50,9 @@ class KoreaInvestRestClient(KoreaInvestApi):
 
         params = {
             'FID_COND_MRKT_DIV_CODE': 'J',
-            'FID_INPUT_ISCD': request.stock_code,
-            'FID_INPUT_DATE_1': request.date_from.strftime('%Y%m%d'),
-            'FID_INPUT_DATE_2': request.date_to.strftime('%Y%m%d'),
+            'FID_INPUT_ISCD': request.stockCode,
+            'FID_INPUT_DATE_1': request.dateFrom.strftime('%Y%m%d'),
+            'FID_INPUT_DATE_2': request.dateTo.strftime('%Y%m%d'),
             'FID_PERIOD_DIV_CODE': 'D'
         }
 
@@ -68,20 +68,20 @@ class KoreaInvestRestClient(KoreaInvestApi):
         tr_id = "FHPST01700000"
 
         params = params = {
-            'fid_rsfl_rate2': request.fluctuation_rate_max,
+            'fid_rsfl_rate2': request.fluctuationRateMax,
             'fid_cond_mrkt_div_code': 'J',
             'fid_cond_scr_div_code': '20170',
-            'fid_input_iscd': request.market_code,
-            'fid_rank_sort_cls_code': request.sort_order,
-            'fid_input_cnt_1': request.result_limit,
-            'fid_prc_cls_code': request.price_type,
-            'fid_input_price_1': request.price_min,
-            'fid_input_price_2': request.price_max,
-            'fid_vol_cnt': request.volume_threshold,
-            'fid_trgt_cls_code': request.target_type,
-            'fid_trgt_exls_cls_code': request.exclude_type,
+            'fid_input_iscd': request.marketCode,
+            'fid_rank_sort_cls_code': request.sortOrder,
+            'fid_input_cnt_1': request.resultLimit,
+            'fid_prc_cls_code': request.priceType,
+            'fid_input_price_1': request.priceMin,
+            'fid_input_price_2': request.priceMax,
+            'fid_vol_cnt': request.volumeThreshold,
+            'fid_trgt_cls_code': request.targetType,
+            'fid_trgt_exls_cls_code': request.excludeType,
             'fid_div_cls_code': request.category_type,
-            'fid_rsfl_rate1': request.fluctuation_rate_min
+            'fid_rsfl_rate1': request.fluctuationRateMin
         }
 
         return self._url_fetch(url, tr_id, params)
@@ -96,12 +96,12 @@ class KoreaInvestRestClient(KoreaInvestApi):
         tr_id = "FHKST03010100"
 
         params = {
-            'FID_COND_MRKT_DIV_CODE': request.market_div_code,
-            'FID_INPUT_ISCD': request.stock_code,
-            'FID_INPUT_DATE_1': request.date_from,
-            'FID_INPUT_DATE_2': request.date_to,
-            'FID_PERIOD_DIV_CODE': request.period_div_code,
-            'FID_ORG_ADJ_PRC': request.org_adj_price,
+            'FID_COND_MRKT_DIV_CODE': request.marketDivCode,
+            'FID_INPUT_ISCD': request.stockCode,
+            'FID_INPUT_DATE_1': request.dateFrom,
+            'FID_INPUT_DATE_2': request.dateTo,
+            'FID_PERIOD_DIV_CODE': request.periodDivCode,
+            'FID_ORG_ADJ_PRC': request.orgAdjPrice,
         }
 
         return self._url_fetch(url, tr_id, params)
