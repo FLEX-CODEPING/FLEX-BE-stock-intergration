@@ -54,6 +54,7 @@ stock_kis_integration_sheet_router = APIRouter(prefix ="/api/kis/stocks", tags =
 stock_kis_integration_ranking_router = APIRouter(prefix ="/api/kis/stocks/ranking", tags = ["KIS Stock Ranking"])
 stock_kis_integration__fluctuation_router = APIRouter(prefix ="/api/kis/stocks", tags = ["KIS Stock Fluctuation"])
 
+
 @app.get("/health", include_in_schema=False)
 async def health_check():
     logger.info("Handling health check request")
@@ -61,9 +62,8 @@ async def health_check():
 
 
 @stock_kis_integration__fluctuation_router.post(
-    "/{stock_code}/inquire-price",
-    summary="주식 현재가 시세 API 요청",
-    description="Retrieve the latest price information for a specific stock using its stock code."
+    "/{stock-code}/inquire-price",
+    summary="주식 현재가 시세 API 요청"
 )
 async def get_inquire_price(stock_code: str):
     config['is_paper_trading'] = True
@@ -73,8 +73,7 @@ async def get_inquire_price(stock_code: str):
 
 @stock_kis_integration__fluctuation_router.post(
     "/daily/trade-volume",
-    summary="종목별 일별 매수 & 매도 체결량 API 요청 (종목별일별매수매도체결량 [v1_국내주식-056] - 모의투자 미지원)",
-    description="Retrieve the latest price information for a specific stock using its stock code."
+    summary="종목별 일별 매수 & 매도 체결량 API 요청 (종목별일별매수매도체결량 [v1_국내주식-056] - 모의투자 미지원)"
 )
 async def get_daily_trade_volume(
     request: DailyTradeVolumeReq = Body(...)
@@ -85,8 +84,7 @@ async def get_daily_trade_volume(
 
 @stock_kis_integration__fluctuation_router.post(
     "/daily/item-chart-price",
-    summary="국내 주식 기간별 시세 (일/주/월/년) API 요청 (국내주식기간별시세(일/주/월/년)[v1_국내주식-016])",
-    description="Retrieve the latest price information for a specific stock using its stock code."
+    summary="국내 주식 기간별 시세 (일/주/월/년) API 요청 (국내주식기간별시세(일/주/월/년)[v1_국내주식-016])"
 )
 async def get_daily_item_chart_price(
     request: DailyItemChartPriceReq = Body(...)
@@ -98,8 +96,7 @@ async def get_daily_item_chart_price(
 
 @stock_kis_integration_ranking_router.post(
     "/fluctuation",
-    summary="국내 주식 등락률 순위 API 요청 (국내 주식 등락률 순위[v1_국내주식-088])",
-    description="Retrieve the latest price information for a specific stock using its stock code."
+    summary="국내 주식 등락률 순위 API 요청 (국내 주식 등락률 순위[v1_국내주식-088])"
 )
 async def get_ranking_fluctuation(
     request: RankingFluctuationReq = Body(...)
@@ -176,6 +173,7 @@ async def websocket_endpoint(websocket: WebSocket, stock_code: str):
             await asyncio.sleep(1)
     except WebSocketDisconnect:
         logger.info(f"Client disconnected for stock {stock_code}")
+
 
 app.include_router(stock_kis_integration_sheet_router)
 app.include_router(stock_kis_integration_ranking_router)
