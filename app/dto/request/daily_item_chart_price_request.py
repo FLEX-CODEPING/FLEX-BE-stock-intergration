@@ -2,19 +2,19 @@ from pydantic import BaseModel, Field
 from typing import Literal
 
 class DailyItemChartPriceReq(BaseModel):
-    market_div_code: Literal['J', 'ETF', 'ETN'] = Field(
+    marketDivCode: Literal['J', 'ETF', 'ETN'] = Field(
         ...,
         description="시장 분류 코드. (J: 주식, ETF, ETN)"
     )  # 시장 분류 코드
-    stock_code: str = Field(
+    stockCode: str = Field(
         ...,
         description="종목 코드. (종목번호(6자리). ETN의 경우, Q로 시작 (ex. Q500001))"
     )  # 종목 코드
-    date_from: str = Field(
+    dateFrom: str = Field(
         ...,
         description="조회 시작 날짜 (YYYYMMDD 형식). (ex. 20220501)"
     )  # 조회 시작 날짜
-    date_to: str = Field(
+    dateTo: str = Field(
         ...,
         description=(
             "조회 종료 날짜 (YYYYMMDD 형식). "
@@ -29,11 +29,11 @@ class DailyItemChartPriceReq(BaseModel):
             "  - 년봉 조회: 해당 년의 영업일 포함되어야 함."
         )
     )  # 조회 종료 날짜
-    period_div_code: Literal['D', 'W', 'M', 'Y'] = Field(
+    periodDivCode: Literal['D', 'W', 'M', 'Y'] = Field(
         ...,
         description="기간 분류 코드. (D: 일봉, W: 주봉, M: 월봉, Y: 년봉)"
     )  # 기간 분류 코드
-    org_adj_price: Literal[0, 1] = Field(
+    orgAdjPrice: Literal[0, 1] = Field(
         ...,
         description="수정주가 여부. (0: 수정주가, 1: 원주가)"
     )  # 수정주가 여부
