@@ -128,7 +128,7 @@ async def get_volume_ranking(
 ):
     config['is_paper_trading'] = False
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
-    return korea_invest_client.get_stock_income_statement(request)
+    return korea_invest_client.get_stock_balance_sheet(request)
 
 @stock_kis_integration_router.post(
     "/income-statement",

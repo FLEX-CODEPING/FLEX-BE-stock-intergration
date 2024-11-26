@@ -16,7 +16,7 @@ from app.dto.request.ranking_volume_request import VolumeRankingReq
 from app.dto.request.balance_sheet_request import BalanceSheetReq
 from app.dto.mapper.ranking_volume_response_mapper import RankingVolumeResMapper
 from app.dto.mapper.income_statement_response_mapper import IncomeStatementResMapper
-from app.dto.mapper.balance_shhet_response_mapper import BalanceSheetResMapper
+from app.dto.mapper.balance_sheet_response_mapper import BalanceSheetResMapper
 
 class KoreaInvestRestClient(KoreaInvestApi):
 
