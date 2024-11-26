@@ -23,6 +23,30 @@ def custom_openapi(app: FastAPI):
     }
     openapi_schema["security"] = [{"bearerAuth": []}]
 
+    # WebSocket 명세 추가
+    openapi_schema["paths"]["/ws/kis/stocks/{stock_code}/real-time"] = {
+        "get": {
+            "summary": "Real-time stock price subscription",
+            "description": (
+                "Establish a WebSocket connection to receive real-time stock price data for a specific stock code. "
+                "Once connected, the server will send updates about the stock price as JSON messages."
+            ),
+            "parameters": [
+                {
+                    "name": "stock_code",
+                    "in": "path",
+                    "required": True,
+                    "description": "The stock code to subscribe to.",
+                    "schema": {"type": "string"}
+                }
+            ],
+            "responses": {
+                "101": {"description": "WebSocket connection established"},
+                "400": {"description": "Invalid stock code"}
+            },
+        }
+    }
+
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
