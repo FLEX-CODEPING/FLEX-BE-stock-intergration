@@ -14,9 +14,11 @@ from app.dto.request.daily_trade_volume_request import DailyTradeVolumeReq
 from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceReq
 from app.dto.request.ranking_volume_request import VolumeRankingReq
 from app.dto.request.balance_sheet_request import BalanceSheetReq
+from app.dto.request.ranking_market_cap_request import MarketCapRankingReq
 from app.dto.mapper.ranking_volume_response_mapper import RankingVolumeResMapper
 from app.dto.mapper.income_statement_response_mapper import IncomeStatementResMapper
 from app.dto.mapper.balance_shhet_response_mapper import BalanceSheetResMapper
+from app.dto.mapper.ranking_market_cap_response_mapper import RankingMarketCapResMapper
 
 class KoreaInvestRestClient(KoreaInvestApi):
 
@@ -119,8 +121,8 @@ class KoreaInvestRestClient(KoreaInvestApi):
             'FID_INPUT_ISCD': request.stockCode,
             'FID_DIV_CLS_CODE': request.classCode,
             'FID_BLNG_CLS_CODE': request.belongCode,
-            'FID_TRGT_CLS_CODE': request.targetCode,
-            'FID_TRGT_EXLS_CLS_CODE': request.targetExcsCode,
+            'FID_TRGT_CLS_CODE': "111111111",
+            'FID_TRGT_EXLS_CLS_CODE': "000000",
             'FID_INPUT_PRICE_1': request.priceMin,
             'FID_INPUT_PRICE_2': request.priceMax,
             'FID_VOL_CNT': request.volCount,
@@ -166,5 +168,30 @@ class KoreaInvestRestClient(KoreaInvestApi):
         }
 
         target_columns, output_columns = BalanceSheetResMapper().get_columns()
+
+        return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+    
+    def get_stock_balance_sheet(self, request: MarketCapRankingReq):
+        """국내주식 시가총액 상위 API 요청.
+
+            Note: 국내주식 시가총액 상위[v1_국내주식-091]
+        """
+
+        url = "/uapi/domestic-stock/v1/ranking/market-cap"
+        tr_id = "FHPST01740000"
+
+        params = {
+            'FID_COND_MRKT_DIV_CODE': 'J',
+            "FID_COND_SCR_DIV_CODE": "20174",
+            "FID_DIV_CLS_CODE": request.divClassCode,
+            "FID_INPUT_ISCD": request.stockCode,
+            "FID_TRGT_CLS_CODE": "0",
+            "FID_TRGT_EXLS_CLS_CODE": "0",
+            "FID_INPUT_PRICE_1": "",
+            "FID_INPUT_PRICE_2": "",
+            "FID_VOL_CNT": request.volCount
+        }
+
+        target_columns, output_columns = RankingMarketCapResMapper().get_columns()
 
         return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
