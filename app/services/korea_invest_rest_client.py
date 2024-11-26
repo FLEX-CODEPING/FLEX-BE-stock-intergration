@@ -19,6 +19,7 @@ from app.dto.mapper.ranking_volume_response_mapper import RankingVolumeResMapper
 from app.dto.mapper.income_statement_response_mapper import IncomeStatementResMapper
 from app.dto.mapper.balance_sheet_response_mapper import BalanceSheetResMapper
 from app.dto.mapper.ranking_market_cap_response_mapper import RankingMarketCapResMapper
+from app.dto.request.income_statement_request import IncomeStatementReq
 
 class KoreaInvestRestClient(KoreaInvestApi):
 
@@ -133,7 +134,7 @@ class KoreaInvestRestClient(KoreaInvestApi):
 
         return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
     
-    def get_stock_income_statement(self, request: VolumeRankingReq):
+    def get_stock_income_statement(self, request: IncomeStatementReq):
         """국내주식 손익계산서 API 요청.
 
             Note: 국내주식 손익계산서[v1_국내주식-079]
