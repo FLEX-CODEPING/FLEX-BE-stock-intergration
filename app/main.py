@@ -160,7 +160,7 @@ korea_invest_websocket = KoreaInvestWebSocketClient(korea_invest_client, websock
 async def startup_event():
     asyncio.create_task(korea_invest_websocket.run())
 
-@app.websocket("/ws/kis/stocks/{stock_code}/real-time")
+@app.websocket("/ws/kis/stocks/{stock-code}/real-time")
 async def websocket_endpoint(websocket: WebSocket, stock_code: str):
     await websocket.accept()
     try:

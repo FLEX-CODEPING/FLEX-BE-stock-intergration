@@ -24,19 +24,19 @@ def custom_openapi(app: FastAPI):
     openapi_schema["security"] = [{"bearerAuth": []}]
 
     # WebSocket 명세 추가
-    openapi_schema["paths"]["/ws/kis/stocks/{stock_code}/real-time"] = {
+    openapi_schema["paths"]["/ws/kis/stocks/{stock-code}/real-time"] = {
         "get": {
-            "summary": "Real-time stock price subscription",
+            "summary": "KIS 실시간 웹소켓 Client",
             "description": (
-                "Establish a WebSocket connection to receive real-time stock price data for a specific stock code. "
-                "Once connected, the server will send updates about the stock price as JSON messages."
+                "종목 코드에 대해 실시간 체결가 또는 호가 데이터를 수신합니다. "
+                "특정 유저가 이미 subscribe 하고 있는 종목 코드를 재요청 할 경우, 호출 상태를 그대로 유지합니다."
             ),
             "parameters": [
                 {
-                    "name": "stock_code",
+                    "name": "stock-code",
                     "in": "path",
                     "required": True,
-                    "description": "The stock code to subscribe to.",
+                    "description": "종목 코드 (티커)",
                     "schema": {"type": "string"}
                 }
             ],
