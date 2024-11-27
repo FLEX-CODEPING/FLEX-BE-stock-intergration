@@ -15,10 +15,12 @@ from app.dto.request.daily_item_chart_price_request import DailyItemChartPriceRe
 from app.dto.request.ranking_volume_request import VolumeRankingReq
 from app.dto.request.balance_sheet_request import BalanceSheetReq
 from app.dto.request.ranking_market_cap_request import MarketCapRankingReq
+from app.dto.request.financial_ratio_request import FinalcialRtioReq
 from app.dto.mapper.ranking_volume_response_mapper import RankingVolumeResMapper
 from app.dto.mapper.income_statement_response_mapper import IncomeStatementResMapper
 from app.dto.mapper.balance_sheet_response_mapper import BalanceSheetResMapper
 from app.dto.mapper.ranking_market_cap_response_mapper import RankingMarketCapResMapper
+from app.dto.mapper.financial_ratio_response_mapper import FinancialRatioResMapper
 
 class KoreaInvestRestClient(KoreaInvestApi):
 
@@ -193,5 +195,24 @@ class KoreaInvestRestClient(KoreaInvestApi):
         }
 
         target_columns, output_columns = RankingMarketCapResMapper().get_columns()
+
+        return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+    
+    def get_financial_ratio(self, request: FinalcialRtioReq):
+        """국내주식 재무비율 API 요청.
+
+            Note: 국내주식 재무비율[v1_국내주식-090]
+        """
+
+        url = "/uapi/domestic-stock/v1/finance/financial-ratio"
+        tr_id = "FHKST66430300"
+
+        params = {
+            'FID_COND_MRKT_DIV_CODE': 'J',
+            'FID_INPUT_ISCD': request.stockCode,
+            'FID_DIV_CLS_CODE': request.classCode
+        }
+
+        target_columns, output_columns = FinancialRatioResMapper().get_columns()
 
         return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
