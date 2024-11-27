@@ -10,22 +10,22 @@ class RankingMarketCapResMapper:
             "prdy_ctrt",  # priceChangeRate
             "acml_vol",  # accTradingVol
             "lstn_stcn",  # listedShares
-            "stck_avls",
-            "mrkt_whol_avls_rlim"
+            "stck_avls", # marketCap
+            "mrkt_whol_avls_rlim" # marketRatio
         ]
         
         self.output_columns = [
-            "stockCode",
-            "ranking",
-            "corpName",
-            "curPrice",
-            "priceChange",
-            "priceChangeSign",
-            "priceChangeRate",
-            "accTradingVol",
-            "listedShares",
-            "marketCap",
-            "marketRatio"
+            "stockCode", # 종목코드
+            "ranking", # 순위
+            "corpName", # 회사명
+            "curPrice", # 현재가
+            "priceChange", # 등락폭
+            "priceChangeSign", # 등락부호
+            "priceChangeRate", # 등락률
+            "accTradingVol", # 누적거래량
+            "listedShares", # 상장주식수
+            "marketCap", # 시가총액
+            "marketRatio" # 시장비율
         ]
         
     def get_columns(self):
