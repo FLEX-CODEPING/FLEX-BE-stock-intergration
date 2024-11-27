@@ -1,7 +1,7 @@
 class IncomeStatementResMapper:
     def __init__(self):
         self.target_columns = [
-            "stac_yymm",  # settlementYearMonth
+            "stac_yymm",  # yearMonth
             "sale_account",  # salesRevenue
             "sale_cost",  # costOfSales
             "sale_totl_prfi",  # grossProfit
