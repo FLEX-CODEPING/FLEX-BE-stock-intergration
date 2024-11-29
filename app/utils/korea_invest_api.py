@@ -48,22 +48,17 @@ class KoreaInvestApi:
         self.hts_id = config['hts_id']
         self.using_url = config['using_url']
 
-    def _url_fetch(self, api_url, tr_id, params, is_post_request=False, target_columns=None, output_columns=None):
-        """API 를 호출하고 결과를 반환합니다.
+    def _fetch_kis_response(self, api_url, tr_id, params, is_post_request=False):
+        """KIS API를 호출하고 KisApiResponse 객체를 반환합니다.
 
         Args:
             api_url (str): API endpoint url
             tr_id (str): 거래 id
             params (dict): API parameters
             is_post_request (bool): POST 요청 여부
-            target_columns (list, optional): 필터링 할 컬럼 리스트
-            output_columns (list, optional): 변환할 컬럼 리스트
 
         Returns:
-            CommonResponseDto: 공통 응답 DTO
-
-        Raises:
-            BaseCustomException: API 요청 실패 예외
+            KisApiResponse: KIS API 응답 객체
         """
         try:
             url = f"{self.using_url}{api_url}"
@@ -77,65 +72,63 @@ class KoreaInvestApi:
             headers["custtype"] = self.cust_type
 
             if is_post_request:
-                res = requests.get(url, headers=headers, data=json.dumps(params))
+                res = requests.post(url, headers=headers, data=json.dumps(params))
             else:
                 res = requests.get(url, headers=headers, params=params)
 
             res.raise_for_status()
-            api_response = KisApiResponse(res)
-
-            # 통합된 메서드로 처리
-            return self.process_response(api_response, target_columns, output_columns)
+            
+            return KisApiResponse(res)  # KIS API 응답 객체 반환
 
         except requests.RequestException as e:
             raise BaseCustomException(
                 ErrorCode.KIS_REQUEST_FAIL,
                 details={"url": api_url, "tr_id": tr_id, "exception": str(e)}
             )
-
-    def process_response(self, api_response, target_columns=None, output_columns=None):
-        """응답 데이터를 필터링하고, CommonResponseDto 로 반환합니다.
+    def _transform_kis_response(self, url, tr_id, params, is_post_request=False, target_columns=None, output_columns=None):
+        """KIS API 응답을 컬럼 필터링 및 변환합니다.
 
         Args:
-            api_response (KisApiResponse): API 응답 객체
-            target_columns (list, optional): 필터링 할 컬럼 리스트. 기본값은 None.
-            output_columns (list, optional): 변환할 컬럼 리스트. 기본값은 None.
+            api_response (KisApiResponse): KIS API 응답 객체
+            target_columns (list): 필터링 할 컬럼 리스트
+            output_columns (list): 변환할 컬럼 리스트
 
         Returns:
-            CommonResponseDto: 처리된 응답 데이터를 포함한 공통 응답 DTO
-
-        Raises:
-            BaseCustomException: API 요청 실패 예외
+            list: 필터링 및 변환된 데이터 리스트
         """
-        if api_response.is_ok():
-            body = api_response.get_body()
+        kis_response = self._fetch_kis_response(url, tr_id, params, is_post_request)
+        if kis_response.is_ok():
+            body = kis_response.get_body()
 
             for key in ["output", "output1", "output2"]:
                 if hasattr(body, key) and getattr(body, key):
                     output_data = getattr(body, key)
 
-                    if isinstance(output_data, dict):
-                        df = pd.DataFrame([output_data])
-                    elif isinstance(output_data, list):
-                        df = pd.DataFrame(output_data)
-                    else:
-                        df = pd.DataFrame(output_data)
+                    # DataFrame 생성
+                    df = pd.DataFrame(output_data)
 
                     # 컬럼 필터링 및 변환
                     if target_columns and output_columns and all(col in df.columns for col in target_columns):
                         columns_rename_map = dict(zip(target_columns, output_columns))
                         df = df[target_columns].rename(columns=columns_rename_map)
 
-                    return CommonResponseDto(result=df.to_dict(orient="records"))
+                    return df.to_dict(orient="records")  # 변환된 결과 반환
 
-            return CommonResponseDto(result=body)
+        return None
 
-        else:
-            raise BaseCustomException(
-                ErrorCode.KIS_REQUEST_FAIL,
-                details={"print_error": api_response.print_error()},
-            )
+    def _url_fetch(self, url, tr_id, params, is_post_request=False, target_columns=None, output_columns=None):
+        """API 응답을 CommonResponseDto로 반환합니다.
 
+        Args:
+            transformed_data (list): 필터링 및 변환된 데이터 리스트
+
+        Returns:
+            CommonResponseDto: 처리된 응답 데이터를 포함한 공통 응답 DTO
+        """
+        transformed_data = self._transform_kis_response(url, tr_id, params, is_post_request, target_columns=target_columns, output_columns=output_columns)
+
+        return CommonResponseDto(result=transformed_data or [])
+    
     def get_send_data(self, cmd=None, stockcode=None):
         # 입력값 체크 step
         global tr_type, tr_id
