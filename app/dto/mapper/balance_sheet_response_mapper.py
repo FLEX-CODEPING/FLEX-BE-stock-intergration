@@ -13,15 +13,15 @@ class BalanceSheetResMapper:
         ]
         
         self.output_columns = [
-            "yearMonth",
-            "curAssets",
-            "fixedAssets",
-            "totalAssets",
-            "curLiabilities",
-            "fixedLiabilities",
-            "totalLiabilities",
-            "capitalStock",
-            "totalEquity"
+        "yearMonth", # 결산연월
+        "curAssets", # 유동자산
+        "fixedAssets", # 비유동자산
+        "totalAssets", # 총자산
+        "curLiabilities", # 유동부채
+        "fixedLiabilities", # 비유동부채
+        "totalLiabilities", # 총부채
+        "capitalStock", # 자본금
+        "totalEquity" # 총자본
         ]
 
     def get_columns(self):

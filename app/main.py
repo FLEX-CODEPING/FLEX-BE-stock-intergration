@@ -1,5 +1,5 @@
 import yaml
-from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect, Body
+from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect, Body, Query
 from fastapi.security import HTTPBearer
 import asyncio
 from loguru import logger
@@ -16,6 +16,7 @@ from app.dto.request.balance_sheet_request import BalanceSheetReq
 from app.config.eureka_client import eureka_lifespan
 from app.dto.request.ranking_volume_request import VolumeRankingReq
 from app.dto.request.ranking_market_cap_request import MarketCapRankingReq
+from app.core.common_response import CommonResponseDto
 
 app = FastAPI(
     lifespan=eureka_lifespan,
@@ -131,25 +132,60 @@ async def get_makret_cap_ranking(
 
 @stock_kis_integration_sheet_router.post(
     "/balance-sheet",
-    summary="국내주식 대차대조표 API 요청 (국내주식 대차대조표[v1_국내주식-078])"
+    summary="국내주식 대차대조표 API 요청 (국내주식 대차대조표[v1_국내주식-078])",
+    deprecated= True
 )
 async def get_volume_ranking(
     request: BalanceSheetReq = Body(...)
 ):
+    """
+    **Deprecated**: 이 API는 더 이상 사용되지 않습니다. 
+    """
     config['is_paper_trading'] = False
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
-    return korea_invest_client.get_stock_balance_sheet(request)
+    kis_response= korea_invest_client.get_stock_income_statement(request)
+    return CommonResponseDto(result=kis_response)
 
 @stock_kis_integration_sheet_router.post(
     "/income-statement",
-    summary="국내주식 손익계산서 API 요청 (국내주식 손익계산서[v1_국내주식-079])"
+    summary="국내주식 손익계산서 API 요청 (국내주식 손익계산서[v1_국내주식-079])",
+    deprecated= True
 )
 async def get_volume_ranking(
     request: IncomeStatementReq = Body(...)
 ):
+    """
+    **Deprecated**: 이 API는 더 이상 사용되지 않습니다. 
+    """
     config['is_paper_trading'] = False
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
-    return korea_invest_client.get_stock_income_statement(request)
+    kis_response= korea_invest_client.get_stock_income_statement(request)
+    return CommonResponseDto(result=kis_response)
+
+@stock_kis_integration_sheet_router.post(
+    "/financial-statements",
+    summary="국내주식 손익계산서와 대차대조표 통합 API"
+)
+async def get_stock_financial_statements(
+    stockCode: str = Query(..., description="주식의 고유 코드 (예: 005930)"),
+    classCode: str = Query(..., description="분류 구분 코드 (0: 전체, 1: 분기)")):
+    """국내주식 손익계산서와 대차대조표 API 요청을 합쳐서 제공."""
+    
+    income_statement_req = IncomeStatementReq(stockCode=stockCode, classCode=classCode)
+    balance_sheet_req = BalanceSheetReq(stockCode=stockCode, classCode=classCode)
+    
+    config['is_paper_trading'] = False
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+
+    income_statement = korea_invest_client.get_stock_income_statement(IncomeStatementReq(stockCode=stockCode, classCode=classCode))
+    balance_sheet = korea_invest_client.get_stock_balance_sheet(BalanceSheetReq(stockCode=stockCode, classCode=classCode))
+
+    combined_result = {
+            "incomeStatementInfo": income_statement,
+            "balanceSheetInfo": balance_sheet
+    }
+    return CommonResponseDto(result=combined_result)
+
 
 korea_invest_client = KoreaInvestRestClient(config, base_headers)
 websocket_url = config['paper_websocket_url'] if config['is_paper_trading'] else config['websocket_url']

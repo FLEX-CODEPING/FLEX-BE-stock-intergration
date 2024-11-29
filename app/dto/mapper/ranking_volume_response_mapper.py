@@ -21,23 +21,23 @@ class RankingVolumeResMapper:
         ]
         
         self.output_columns = [
-            "corpName",
-            "stockCode",
-            "ranking",
-            "curPrice",
-            "priceChangeSign",
-            "priceChange",
-            "priceChangeRate",
-            "accTradingVolume",
-            "preDayTradingVolume",
-            "listedShares",
-            "avgTradingVolume",
-            "prevPeriodPriceChangeRate",
-            "volIncreaseRate",
-            "volTurnoverRate",
-            "periodVolTurnoverRate",
-            "avgTradingValue",
-            "accTradingValue"
+            "corpName", # 회사명
+            "stockCode", # 종목코드
+            "ranking", # 순위
+            "curPrice", # 현재가
+            "priceChangeSign", # 등락부호
+            "priceChange", # 등락폭
+            "priceChangeRate", # 등락률
+            "accTradingVolume", # 누적거래량
+            "preDayTradingVolume", # 전일거래량
+            "listedShares", # 상장주식수
+            "avgTradingVolume", # 평균거래량
+            "prevPeriodPriceChangeRate", # 전기간대비등락률
+            "volIncreaseRate", # 거래량증가율
+            "volTurnoverRate", # 거래회전율
+            "periodVolTurnoverRate", # 기간거래회전율
+            "avgTradingValue", # 평균거래대금
+            "accTradingValue" # 누적거래대금
         ]
 
     def get_columns(self):

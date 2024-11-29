@@ -153,7 +153,7 @@ class KoreaInvestRestClient(KoreaInvestApi):
 
         target_columns, output_columns = IncomeStatementResMapper().get_columns()
 
-        return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+        return  self._transform_kis_response(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
 
     def get_stock_balance_sheet(self, request: BalanceSheetReq):
         """국내주식 대차대조표 API 요청.
@@ -172,7 +172,8 @@ class KoreaInvestRestClient(KoreaInvestApi):
 
         target_columns, output_columns = BalanceSheetResMapper().get_columns()
 
-        return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+        return self._transform_kis_response(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+
     
     def get_makret_cap_ranking(self, request: MarketCapRankingReq):
         """국내주식 시가총액 상위 API 요청.
@@ -199,19 +200,18 @@ class KoreaInvestRestClient(KoreaInvestApi):
 
         return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
     
-    def get_financial_ratio(self, request: FinalcialRtioReq):
-        """국내주식 재무비율 API 요청.
+    def get_stock_info(self, request: FinalcialRtioReq):
+        """국내주식 기본정보 API 요청.
 
-            Note: 국내주식 재무비율[v1_국내주식-090]
+            Note: 국내주식 기본정보[v1_국내주식-067]
         """
 
-        url = "/uapi/domestic-stock/v1/finance/financial-ratio"
-        tr_id = "FHKST66430300"
+        url = "/uapi/domestic-stock/v1/quotations/search-stock-info"
+        tr_id = "CTPF1002R"
 
         params = {
-            'FID_COND_MRKT_DIV_CODE': 'J',
-            'FID_INPUT_ISCD': request.stockCode,
-            'FID_DIV_CLS_CODE': request.classCode
+            'PRDT_TYPE_CD': '300', #주식
+            'PDNO': request.stockCode
         }
 
         target_columns, output_columns = FinancialRatioResMapper().get_columns()
