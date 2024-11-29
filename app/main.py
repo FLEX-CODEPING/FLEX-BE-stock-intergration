@@ -1,5 +1,5 @@
 import yaml
-from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect, Body
+from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect, Body, Query
 from fastapi.security import HTTPBearer
 import asyncio
 from loguru import logger
@@ -138,6 +138,9 @@ async def get_makret_cap_ranking(
 async def get_volume_ranking(
     request: BalanceSheetReq = Body(...)
 ):
+    """
+    **Deprecated**: 이 API는 더 이상 사용되지 않습니다. 
+    """
     config['is_paper_trading'] = False
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
     kis_response= korea_invest_client.get_stock_income_statement(request)
@@ -151,6 +154,9 @@ async def get_volume_ranking(
 async def get_volume_ranking(
     request: IncomeStatementReq = Body(...)
 ):
+    """
+    **Deprecated**: 이 API는 더 이상 사용되지 않습니다. 
+    """
     config['is_paper_trading'] = False
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
     kis_response= korea_invest_client.get_stock_income_statement(request)
@@ -160,7 +166,9 @@ async def get_volume_ranking(
     "/financial-statements",
     summary="국내주식 손익계산서와 대차대조표 통합 API"
 )
-async def get_stock_financial_statements(stockCode: str, classCode: str):
+async def get_stock_financial_statements(
+    stockCode: str = Query(..., description="주식의 고유 코드 (예: 005930)"),
+    classCode: str = Query(..., description="분류 구분 코드 (0: 전체, 1: 분기)")):
     """국내주식 손익계산서와 대차대조표 API 요청을 합쳐서 제공."""
     
     income_statement_req = IncomeStatementReq(stockCode=stockCode, classCode=classCode)
@@ -173,8 +181,8 @@ async def get_stock_financial_statements(stockCode: str, classCode: str):
     balance_sheet = korea_invest_client.get_stock_balance_sheet(BalanceSheetReq(stockCode=stockCode, classCode=classCode))
 
     combined_result = {
-            "incomeStatement": income_statement,
-            "balanceSheet": balance_sheet
+            "incomeStatementInfo": income_statement,
+            "balanceSheetInfo": balance_sheet
     }
     return CommonResponseDto(result=combined_result)
 
