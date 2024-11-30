@@ -22,6 +22,9 @@ from app.dto.mapper.balance_sheet_response_mapper import BalanceSheetResMapper
 from app.dto.mapper.ranking_market_cap_response_mapper import RankingMarketCapResMapper
 from app.dto.mapper.financial_ratio_response_mapper import FinancialRatioResMapper
 from app.dto.request.income_statement_request import IncomeStatementReq
+from app.dto.mapper.trading_volume_response_mapper import TradingVolumeResMapper
+from app.dto.mapper.ranking_fluctuation_response_mapper import RankingFluctuationsMapper
+
 
 class KoreaInvestRestClient(KoreaInvestApi):
 
@@ -57,8 +60,8 @@ class KoreaInvestRestClient(KoreaInvestApi):
             'FID_INPUT_DATE_2': request.dateTo.strftime('%Y%m%d'),
             'FID_PERIOD_DIV_CODE': 'D'
         }
-
-        return self._url_fetch(url, tr_id, params)
+        mappings = TradingVolumeResMapper().get_mappings()
+        return self._url_fetch(url, tr_id, params, mappings=mappings)
 
 
     def get_ranking_fluctuation(self, request: RankingFluctuationReq):
@@ -82,11 +85,11 @@ class KoreaInvestRestClient(KoreaInvestApi):
             'fid_vol_cnt': request.volumeThreshold,
             'fid_trgt_cls_code': request.targetType,
             'fid_trgt_exls_cls_code': request.excludeType,
-            'fid_div_cls_code': request.category_type,
+            'fid_div_cls_code': request.categoryType,
             'fid_rsfl_rate1': request.fluctuationRateMin
         }
-
-        return self._url_fetch(url, tr_id, params)
+        mappings = RankingFluctuationsMapper().get_mappings()
+        return self._url_fetch(url, tr_id, params, mappings=mappings)
 
 
     def get_daily_item_chart_price(self, request: DailyItemChartPriceReq):
@@ -132,9 +135,9 @@ class KoreaInvestRestClient(KoreaInvestApi):
             'FID_INPUT_DATE_1': ""
             #'FID_INPUT_DATE_1': request.inputDateStart
         }
-        target_columns, output_columns = RankingVolumeResMapper().get_columns()
+        mappings = RankingVolumeResMapper().get_mappings()
 
-        return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+        return self._url_fetch(url, tr_id, params, mappings=mappings)
     
     def get_stock_income_statement(self, request: IncomeStatementReq):
         """국내주식 손익계산서 API 요청.
@@ -151,9 +154,9 @@ class KoreaInvestRestClient(KoreaInvestApi):
             'FID_DIV_CLS_CODE': request.classCode
         }
 
-        target_columns, output_columns = IncomeStatementResMapper().get_columns()
+        mappings = IncomeStatementResMapper().get_mappings()
 
-        return  self._transform_kis_response(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+        return  self._transform_kis_response(url, tr_id, params, mappings=mappings)
 
     def get_stock_balance_sheet(self, request: BalanceSheetReq):
         """국내주식 대차대조표 API 요청.
@@ -170,9 +173,9 @@ class KoreaInvestRestClient(KoreaInvestApi):
             'FID_DIV_CLS_CODE': request.classCode
         }
 
-        target_columns, output_columns = BalanceSheetResMapper().get_columns()
+        mappings = BalanceSheetResMapper().get_mappings()
 
-        return self._transform_kis_response(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+        return self._transform_kis_response(url, tr_id, params, mappings= mappings)
 
     
     def get_makret_cap_ranking(self, request: MarketCapRankingReq):
@@ -196,9 +199,9 @@ class KoreaInvestRestClient(KoreaInvestApi):
             "FID_VOL_CNT": request.volCount
         }
 
-        target_columns, output_columns = RankingMarketCapResMapper().get_columns()
+        mappings = RankingMarketCapResMapper().get_mappings()
 
-        return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+        return self._url_fetch(url, tr_id,params=params, mappings=mappings)
     
     def get_stock_info(self, request: FinalcialRtioReq):
         """국내주식 기본정보 API 요청.
@@ -214,6 +217,6 @@ class KoreaInvestRestClient(KoreaInvestApi):
             'PDNO': request.stockCode
         }
 
-        target_columns, output_columns = FinancialRatioResMapper().get_columns()
+        mappings = FinancialRatioResMapper().get_mappings()
 
-        return self._url_fetch(url, tr_id, params, target_columns=target_columns, output_columns=output_columns)
+        return self._url_fetch(url, tr_id, params, mappings = mappings)

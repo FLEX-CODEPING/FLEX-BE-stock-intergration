@@ -110,16 +110,14 @@ class KoreaInvestApi:
             if hasattr(body, "output") and getattr(body, "output"):
                 output_data = getattr(body, "output")
 
-                # output_data가 딕셔너리라면 리스트로 변환
                 if isinstance(output_data, dict):
                     output_data = [output_data]
 
-                # "output" 매핑
                 result = [
                     {mappings["output"].get(k, k): v for k, v in item.items() if k in mappings["output"]}
                     for item in output_data
                 ]
-                return result  # "output"만 반환
+                return result 
 
             for key in ["output1", "output2"]:
                 if hasattr(body, key) and getattr(body, key):
