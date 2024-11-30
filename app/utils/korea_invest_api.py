@@ -97,23 +97,33 @@ class KoreaInvestApi:
             list: 필터링 및 변환된 데이터 리스트
         """
         kis_response = self._fetch_kis_response(url, tr_id, params, is_post_request)
+        
         if kis_response.is_ok():
             body = kis_response.get_body()
 
+            result = []
+
             for key in ["output", "output1", "output2"]:
-                if hasattr(body, key) and getattr(body, key):
+                if hasattr(body, key) and getattr(body, key):  
                     output_data = getattr(body, key)
 
-                    # DataFrame 생성
-                    df = pd.DataFrame(output_data)
+                    if isinstance(output_data, dict):
+                        output_data = [output_data]
+                    # output_data가 리스트가 아니거나 비어있는 경우 예외 처리
+                    if not isinstance(output_data, list):
+                        raise ValueError(f"{key} 데이터가 리스트가 아니거나 지원되지 않는 형식입니다. 데이터: {output_data}")
+                    
 
-                    # 컬럼 필터링 및 변환
+                    df = pd.DataFrame(output_data)
                     if target_columns and output_columns and all(col in df.columns for col in target_columns):
                         columns_rename_map = dict(zip(target_columns, output_columns))
                         df = df[target_columns].rename(columns=columns_rename_map)
 
-                    return df.to_dict(orient="records")  # 변환된 결과 반환
+                    result.extend(df.to_dict(orient="records"))  # 변환된 데이터 추가
 
+            if result:
+                return result  # 변환된 결과 반환
+            return body  # output1, output2가 없다면 원본 데이터 반환
         return None
 
     def _url_fetch(self, url, tr_id, params, is_post_request=False, target_columns=None, output_columns=None):
@@ -127,7 +137,7 @@ class KoreaInvestApi:
         """
         transformed_data = self._transform_kis_response(url, tr_id, params, is_post_request, target_columns=target_columns, output_columns=output_columns)
 
-        return CommonResponseDto(result=transformed_data or [])
+        return CommonResponseDto(result=transformed_data)
     
     def get_send_data(self, cmd=None, stockcode=None):
         # 입력값 체크 step
