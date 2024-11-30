@@ -85,48 +85,57 @@ class KoreaInvestApi:
                 ErrorCode.KIS_REQUEST_FAIL,
                 details={"url": api_url, "tr_id": tr_id, "exception": str(e)}
             )
-    def _transform_kis_response(self, url, tr_id, params, is_post_request=False, target_columns=None, output_columns=None):
+    def _transform_kis_response(self, url, tr_id, params, is_post_request=False, mappings=None):
         """KIS API 응답을 컬럼 필터링 및 변환합니다.
 
         Args:
-            api_response (KisApiResponse): KIS API 응답 객체
-            target_columns (list): 필터링 할 컬럼 리스트
-            output_columns (list): 변환할 컬럼 리스트
+            url (str): API 요청 URL
+            tr_id (str): 거래 ID
+            params (dict): API 요청 파라미터
+            is_post_request (bool): POST 요청 여부
+            mappings (dict): 매핑 규칙
 
         Returns:
-            list: 필터링 및 변환된 데이터 리스트
+            dict: 필터링 및 변환된 데이터
         """
         kis_response = self._fetch_kis_response(url, tr_id, params, is_post_request)
         
         if kis_response.is_ok():
             body = kis_response.get_body()
+            
+            if mappings is None:
+                return body
 
-            result = []
+            result = {}
+            if hasattr(body, "output") and getattr(body, "output"):
+                output_data = getattr(body, "output")
 
-            for key in ["output", "output1", "output2"]:
-                if hasattr(body, key) and getattr(body, key):  
+                # output_data가 딕셔너리라면 리스트로 변환
+                if isinstance(output_data, dict):
+                    output_data = [output_data]
+
+                # "output" 매핑
+                result = [
+                    {mappings["output"].get(k, k): v for k, v in item.items() if k in mappings["output"]}
+                    for item in output_data
+                ]
+                return result  # "output"만 반환
+
+            for key in ["output1", "output2"]:
+                if hasattr(body, key) and getattr(body, key):
                     output_data = getattr(body, key)
 
                     if isinstance(output_data, dict):
                         output_data = [output_data]
-                    # output_data가 리스트가 아니거나 비어있는 경우 예외 처리
-                    if not isinstance(output_data, list):
-                        raise ValueError(f"{key} 데이터가 리스트가 아니거나 지원되지 않는 형식입니다. 데이터: {output_data}")
-                    
 
-                    df = pd.DataFrame(output_data)
-                    if target_columns and output_columns and all(col in df.columns for col in target_columns):
-                        columns_rename_map = dict(zip(target_columns, output_columns))
-                        df = df[target_columns].rename(columns=columns_rename_map)
+                    result[key] = [
+                        {mappings[key].get(k, k): v for k, v in item.items() if k in mappings[key]}
+                        for item in output_data
+                    ]
+            return result if result else body
 
-                    result.extend(df.to_dict(orient="records"))  # 변환된 데이터 추가
 
-            if result:
-                return result  # 변환된 결과 반환
-            return body  # output1, output2가 없다면 원본 데이터 반환
-        return None
-
-    def _url_fetch(self, url, tr_id, params, is_post_request=False, target_columns=None, output_columns=None):
+    def _url_fetch(self, url, tr_id, params, is_post_request=False, mappings=None):
         """API 응답을 CommonResponseDto로 반환합니다.
 
         Args:
@@ -135,7 +144,7 @@ class KoreaInvestApi:
         Returns:
             CommonResponseDto: 처리된 응답 데이터를 포함한 공통 응답 DTO
         """
-        transformed_data = self._transform_kis_response(url, tr_id, params, is_post_request, target_columns=target_columns, output_columns=output_columns)
+        transformed_data = self._transform_kis_response(url, tr_id, params, is_post_request, mappings)
 
         return CommonResponseDto(result=transformed_data)
     
