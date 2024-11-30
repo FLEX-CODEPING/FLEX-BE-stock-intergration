@@ -8,7 +8,6 @@ class RankingFluctuationReq(BaseModel):
     )
     fluctuationRateMin: str = Field("", description="최소 등락 비율. 입력값이 없으면 전체 (비율 ~).")
     fluctuationRateMax: str = Field("", description="최대 등락 비율. 입력값이 없으면 전체 (~ 비율).")
-    marketType: str = Field(..., description="조건 시장 분류 코드. 시장 구분 코드 (주식: J).")
     sortOrder: str = Field(
         ...,
         description=(
