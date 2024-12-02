@@ -16,7 +16,8 @@ from app.dto.request.balance_sheet_request import BalanceSheetReq
 from app.config.eureka_client import eureka_lifespan
 from app.dto.request.ranking_volume_request import VolumeRankingReq
 from app.dto.request.ranking_market_cap_request import MarketCapRankingReq
-from app.dto.request.inquire_time_daily_chart_price_request import InqurieTimeDailyItemChartPriceReq
+from app.dto.request.inquire_time_daily_chart_price_request import InqurieTimeDailyChartPriceReq
+from app.dto.request.inquire_time_item_chart_price_request import InqurieTimeItemChartPriceReq
 from app.core.common_response import CommonResponseDto
 
 app = FastAPI(
@@ -96,16 +97,26 @@ async def get_daily_item_chart_price(
     return korea_invest_client.get_daily_item_chart_price(request)
 
 @stock_kis_integration__fluctuation_router.post(
-    "/daily/item-chart-price/inquire-price",
+    "/daily/daily-chart-price/inquire-price",
     summary="주식일별분봉조회 API [국내주식-213]"
 )
 async def get_inqurie_time_daily_chart_price(
-    request: InqurieTimeDailyItemChartPriceReq = Body(...)
+    request: InqurieTimeDailyChartPriceReq = Body(...)
 ):
     config['is_paper_trading'] = True
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
     return korea_invest_client.get_inqurie_time_daily_chart_price(request)
 
+@stock_kis_integration__fluctuation_router.post(
+    "/daily/item-chart-price/inquire-price",
+    summary="주식당일분봉조회[v1_국내주식-022]"
+)
+async def get_inqurie_time_item_chart_price(
+    request: InqurieTimeItemChartPriceReq = Body(...)
+):
+    config['is_paper_trading'] = True
+    korea_invest_client = KoreaInvestRestClient(config, base_headers)
+    return CommonResponseDto(result=korea_invest_client.get_inqurie_time_item_chart_price(request))
 
 @stock_kis_integration_ranking_router.post(
     "/fluctuation",
