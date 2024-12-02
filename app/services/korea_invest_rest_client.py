@@ -24,8 +24,10 @@ from app.dto.mapper.financial_ratio_response_mapper import FinancialRatioResMapp
 from app.dto.request.income_statement_request import IncomeStatementReq
 from app.dto.mapper.trading_volume_response_mapper import TradingVolumeResMapper
 from app.dto.mapper.ranking_fluctuation_response_mapper import RankingFluctuationsMapper
-from  app.dto.mapper.inquire_time_daily_chart_price_response_mapper import InquireTimeDailyChartPriceResMapper
-from app.dto.request.inquire_time_daily_chart_price_request import InqurieTimeDailyItemChartPriceReq
+from app.dto.mapper.inquire_time_daily_chart_price_response_mapper import InquireTimeDailyChartPriceResMapper
+from app.dto.request.inquire_time_daily_chart_price_request import InqurieTimeDailyChartPriceReq
+from app.dto.request.inquire_time_item_chart_price_request import InqurieTimeItemChartPriceReq
+from app.dto.mapper.inquire_time_item_chart_response_mapper import InquireTimeItemChartResMapper
 
 
 
@@ -224,7 +226,7 @@ class KoreaInvestRestClient(KoreaInvestApi):
 
         return self._url_fetch(url, tr_id, params, mappings = mappings)
 
-    def get_inqurie_time_daily_chart_price(self, request: DailyItemChartPriceReq):
+    def get_inqurie_time_daily_chart_price(self, request: InqurieTimeDailyChartPriceReq):
         """주식일별분봉조회 API 요청.
 
             Note: 주식일별분봉조회 [국내주식-213]
@@ -245,3 +247,24 @@ class KoreaInvestRestClient(KoreaInvestApi):
         mappings = InquireTimeDailyChartPriceResMapper().get_mappings()
 
         return self._url_fetch(url, tr_id, params, mappings = mappings)
+    
+    def get_inqurie_time_item_chart_price(self, request: InqurieTimeItemChartPriceReq):
+        """주식당일분봉조회 API 요청.
+
+            Note: 주식당일분봉조회[v1_국내주식-022]
+        """
+
+        url = "/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice"
+        tr_id = "FHKST03010200"
+
+        params = {
+            'FID_ETC_CLS_CODE': '',
+            'FID_COND_MRKT_DIV_CODE': 'J',
+            'FID_INPUT_ISCD': request.stockCode,
+            'FID_INPUT_HOUR_1': request.time,
+            'FID_PW_DATA_INCU_YN' : 'Y'
+        }
+
+        mappings = InquireTimeItemChartResMapper().get_mappings()
+
+        return self._transform_kis_response(url, tr_id, params, mappings=mappings)

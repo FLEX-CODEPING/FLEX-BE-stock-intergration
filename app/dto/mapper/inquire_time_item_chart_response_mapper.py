@@ -1,4 +1,4 @@
-class InquireTimeDailyChartPriceResMapper:
+class InquireTimeItemChartResMapper:
     def __init__(self):
         self.mappings = {
             "output1": {
@@ -14,12 +14,12 @@ class InquireTimeDailyChartPriceResMapper:
             "output2": {
                 "stck_bsop_date": "tradingDate",  # 주식 영업 일자
                 "stck_cntg_hour": "transactionTime",  # 주식 체결 시간
-                "stck_prpr": "curPrice",  # 주식 현재가 
+                "acml_tr_pbmn": "accTradeAmount",  # 누적 거래 대금 (중복)
+                "stck_prpr": "curPrice",  # 주식 현재가 (중복)
                 "stck_oprc": "openPrice",  # 주식 시가2
                 "stck_hgpr": "highPrice",  # 주식 최고가
                 "stck_lwpr": "lowPrice",  # 주식 최저가
-                "cntg_vol": "transactionVolume",  # 체결 거래량
-                "acml_tr_pbmn": "accTradeAmount"  # 누적 거래 대금 
+                "cntg_vol": "transactionVolume"  # 체결 거래량
             }
         }
 
