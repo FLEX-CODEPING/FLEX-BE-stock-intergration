@@ -24,6 +24,9 @@ from app.dto.mapper.financial_ratio_response_mapper import FinancialRatioResMapp
 from app.dto.request.income_statement_request import IncomeStatementReq
 from app.dto.mapper.trading_volume_response_mapper import TradingVolumeResMapper
 from app.dto.mapper.ranking_fluctuation_response_mapper import RankingFluctuationsMapper
+from  app.dto.mapper.inquire_time_daily_chart_price_response_mapper import InquireTimeDailyChartPriceResMapper
+from app.dto.request.inquire_time_daily_chart_price_request import InqurieTimeDailyItemChartPriceReq
+
 
 
 class KoreaInvestRestClient(KoreaInvestApi):
@@ -218,5 +221,27 @@ class KoreaInvestRestClient(KoreaInvestApi):
         }
 
         mappings = FinancialRatioResMapper().get_mappings()
+
+        return self._url_fetch(url, tr_id, params, mappings = mappings)
+
+    def get_inqurie_time_daily_chart_price(self, request: DailyItemChartPriceReq):
+        """주식일별분봉조회 API 요청.
+
+            Note: 주식일별분봉조회 [국내주식-213]
+        """
+
+        url = "/uapi/domestic-stock/v1/quotations/inquire-time-dailychartprice"
+        tr_id = "FHKST03010230"
+
+        params = {
+            'FID_COND_MRKT_DIV_CODE': 'J',
+            'FID_INPUT_ISCD': request.stockCode,
+            'FID_INPUT_DATE_1': request.date,
+            'FID_INPUT_HOUR_1': request.time,
+            'FID_PW_DATA_INCU_YN' : 'Y',
+            'FID_FAKE_TICK_INCU_YN' : 'N'
+        }
+
+        mappings = InquireTimeDailyChartPriceResMapper().get_mappings()
 
         return self._url_fetch(url, tr_id, params, mappings = mappings)
