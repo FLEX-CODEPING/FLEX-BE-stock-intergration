@@ -65,13 +65,13 @@ async def health_check():
 
 
 @stock_kis_integration__fluctuation_router.post(
-    "/{stock-code}/inquire-price",
+    "/inquire-price",
     summary="주식 현재가 시세 API 요청"
 )
-async def get_inquire_price(stock_code: str):
+async def get_inquire_price(stockcode: str):
     config['is_paper_trading'] = True
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
-    return korea_invest_client.get_inquire_price(stock_code)
+    return korea_invest_client.get_inquire_price(stockcode)
 
 
 @stock_kis_integration__fluctuation_router.post(
@@ -219,19 +219,19 @@ korea_invest_websocket = KoreaInvestWebSocketClient(korea_invest_client, websock
 async def startup_event():
     asyncio.create_task(korea_invest_websocket.run())
 
-@app.websocket("/ws/kis/stocks/{stock-code}/real-time")
-async def websocket_endpoint(websocket: WebSocket, stock_code: str):
+@app.websocket("/ws/kis/stocks/real-time")
+async def websocket_endpoint(websocket: WebSocket, stockcode: str):
     await websocket.accept()
     try:
-        await korea_invest_websocket.subscribe(stock_code) # 주가 정보 subscribe
+        await korea_invest_websocket.subscribe(stockcode) # 주가 정보 subscribe
 
         while True:
-            data = await korea_invest_websocket.get_stock_data(stock_code)
+            data = await korea_invest_websocket.get_stock_data(stockcode)
             if data:
                 await websocket.send_json(data)
             await asyncio.sleep(1)
     except WebSocketDisconnect:
-        logger.info(f"Client disconnected for stock {stock_code}")
+        logger.info(f"Client disconnected for stock {stockcode}")
 
 
 app.include_router(stock_kis_integration_sheet_router)

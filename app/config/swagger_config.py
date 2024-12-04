@@ -24,7 +24,7 @@ def custom_openapi(app: FastAPI):
     openapi_schema["security"] = [{"bearerAuth": []}]
 
     # WebSocket 명세 추가
-    openapi_schema["paths"]["/ws/kis/stocks/{stock-code}/real-time"] = {
+    openapi_schema["paths"]["/ws/kis/stocks/real-time"] = {
         "get": {
             "summary": "KIS 실시간 웹소켓 Client",
             "description": (
@@ -33,8 +33,8 @@ def custom_openapi(app: FastAPI):
             ),
             "parameters": [
                 {
-                    "name": "stock-code",
-                    "in": "path",
+                    "name": "stockcode",
+                    "in": "parameter",
                     "required": True,
                     "description": "종목 코드 (티커)",
                     "schema": {"type": "string"}
