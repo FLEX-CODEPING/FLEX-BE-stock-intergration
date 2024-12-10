@@ -2,3 +2,7 @@
 /config_kis.yaml
 /.env.local
 /.env.dev
+__pycache__/
+.idea/FLEX-BE-stock.iml
+.idea/modules.xml
+.idea/vcs.xml
