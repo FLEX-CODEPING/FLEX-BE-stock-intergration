@@ -29,10 +29,7 @@ from app.dto.request.inquire_time_daily_chart_price_request import InqurieTimeDa
 from app.dto.request.inquire_time_item_chart_price_request import InqurieTimeItemChartPriceReq
 from app.dto.mapper.inquire_time_item_chart_response_mapper import InquireTimeItemChartResMapper
 
-
-
 class KoreaInvestRestClient(KoreaInvestApi):
-
     def get_inquire_price(self, stock_no):
         """주식 현재가 시세 API 요청.
 
