@@ -87,7 +87,7 @@ async def get_daily_trade_volume(
     return korea_invest_client.get_daily_trade_volume(request)
 
 @stock_kis_integration__fluctuation_router.post(
-    "/daily/item-chart-price/origin",
+    "/daily/item-chart-price",
     summary="국내 주식 기간별 시세 (일/주/월/년) API 요청 (국내주식기간별시세(일/주/월/년)[v1_국내주식-016])"
 )
 async def get_daily_item_chart_price(
