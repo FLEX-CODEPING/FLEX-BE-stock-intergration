@@ -17,7 +17,8 @@ from app.exceptions.error_code import ErrorCode
 from app.exceptions.custom_exception import BaseCustomException
 from app.config.redis_config import redis_client
 import json
-from app.utils.date_utils import *
+from app.utils.redis_key_date_utils import get_redis_key_dates
+from app.utils.kis_request_date_utils import get_current_request_date
 import logging
 from app.utils.period_div_code import *
 
@@ -53,14 +54,14 @@ class KoreaInvestFluctuationRestClient(KoreaInvestApi):
         if request.dateTo < today:
             return self._url_fetch(url, tr_id, params)
 
-        new_date_from, new_date_to = get_redis_key_dates(request)
-        logging.debug(f"{new_date_from}-{new_date_to}")
-        redis_key = f"{request.stockCode}:{request.periodDivCode}:{new_date_from}:{new_date_to}"
+        new_date_to = get_redis_key_dates(request.periodDivCode)
+        logging.debug(f"{request.dateFrom}-{new_date_to}")
+        redis_key = f"{request.stockCode}:{request.periodDivCode}:{request.dateFrom}:{new_date_to}"
         logging.debug(redis_key)
         cached_data = self.redis_client.get(redis_key)
 
         if cached_data is not None:
-            return self._handle_cached_data(request, url, tr_id, cached_data, new_date_to)
+            return self._handle_cached_data(request, url, tr_id, cached_data)
         
         return self._transform_kis_response(url, tr_id, params)
 
@@ -75,13 +76,14 @@ class KoreaInvestFluctuationRestClient(KoreaInvestApi):
             'FID_ORG_ADJ_PRC': request.orgAdjPrice,
         }
 
-    def _handle_cached_data(self, request, url, tr_id, cached_data, date_to):
-        """캐시된 데이터를 처리하는 함수."""
+    def _handle_cached_data(self, request: DailyItemChartPriceReq
+                            , url, tr_id, cached_data):
+        """캐시된 데이터를 처리 및 새로운 봉 데이터와 통합하는 함수"""
         cached_data_list = json.loads(cached_data)
         
-        cur_request_date_from = get_current_request_date(request)
+        new_request_date_from = get_current_request_date(request)
         
-        new_params = self._build_new_params(request, cur_request_date_from, request.dateTo)
+        new_params = self._build_new_params(request, new_request_date_from, request.dateTo)
 
         response = self._transform_kis_response(url, tr_id, new_params)
         
