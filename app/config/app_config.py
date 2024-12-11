@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     redis_host: str
     redis_port: int
     redis_db: str
+    redis_password: str
 
     model_config = SettingsConfigDict(
         env_file=(".env.local", ".env.dev", ".env.prod"),
