@@ -18,14 +18,14 @@ def get_current_request_date(request: DailyItemChartPriceReq):
         return request.dateTo
 
 def get_yearly_new_request_date_from(date_str):
-        """
-        주어진 날짜 문자열의 연도를 변경하는 함수.
-        """
-        date_obj = get_date_obj(date_str)
-        
-        new_date_obj = date_obj.replace(year=date_obj.year - 1)
-        
-        return new_date_obj.strftime('%Y%m%d')
+    """
+    주어진 날짜 문자열의  1월 1일을 반환하는 함수.
+    """
+    date_obj = datetime.strptime(date_str, '%Y%m%d')
+    
+    new_date_obj = date_obj.replace(month=1, day=1)
+    
+    return new_date_obj.strftime('%Y%m%d')
     
 def get_monthly_new_request_date_from(date_str):
     """

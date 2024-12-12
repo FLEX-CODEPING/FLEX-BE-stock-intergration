@@ -225,6 +225,7 @@ async def get_stock_financial_statements(
 
 
 korea_invest_client = KoreaInvestRestClient(config, base_headers)
+
 websocket_url = config['paper_websocket_url'] if config['is_paper_trading'] else config['websocket_url']
 korea_invest_websocket = KoreaInvestWebSocketClient(korea_invest_client, websocket_url)
 
