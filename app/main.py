@@ -5,6 +5,7 @@ import asyncio
 from loguru import logger
 from app.utils.korea_invest_env import KoreaInvestEnv
 from app.services.korea_invest_rest_client import KoreaInvestRestClient
+from app.services.korea_invest_fluctuation_rest_client import KoreaInvestFluctuationRestClient
 from app.config.swagger_config import setup_swagger
 from fastapi.middleware.cors import CORSMiddleware
 from app.services.korea_invest_ws_client import KoreaInvestWebSocketClient
@@ -94,7 +95,20 @@ async def get_daily_item_chart_price(
 ):
     config['is_paper_trading'] = True
     korea_invest_client = KoreaInvestRestClient(config, base_headers)
+
     return korea_invest_client.get_daily_item_chart_price(request)
+
+@stock_kis_integration__fluctuation_router.post(
+    "/daily/item-chart-price/cached",
+    summary="국내 주식 기간별 시세 (일/주/월/년) API 요청 (국내주식기간별시세(일/주/월/년)[v1_국내주식-016])"
+)
+async def get_daily_item_chart_price(
+    request: DailyItemChartPriceReq = Body(...)
+):
+    config['is_paper_trading'] = True
+    korea_invest_client = KoreaInvestFluctuationRestClient(config, base_headers)
+
+    return CommonResponseDto(result=korea_invest_client.get_daily_item_chart_price(request))
 
 @stock_kis_integration__fluctuation_router.post(
     "/daily/daily-chart-price/inquire-price",
@@ -211,6 +225,7 @@ async def get_stock_financial_statements(
 
 
 korea_invest_client = KoreaInvestRestClient(config, base_headers)
+
 websocket_url = config['paper_websocket_url'] if config['is_paper_trading'] else config['websocket_url']
 korea_invest_websocket = KoreaInvestWebSocketClient(korea_invest_client, websocket_url)
 
