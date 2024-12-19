@@ -16,6 +16,7 @@ import requests
 from app.exceptions.custom_exception import BaseCustomException
 from app.core.common_response import CommonResponseDto
 from app.exceptions.error_code import ErrorCode
+import pandas as pd
 
 
 class KoreaInvestApi:
@@ -47,8 +48,8 @@ class KoreaInvestApi:
         self.hts_id = config['hts_id']
         self.using_url = config['using_url']
 
-    def _url_fetch(self, api_url, tr_id, params, is_post_request = False):
-        """API 를 호출하고 결과를 반환합니다.
+    def _fetch_kis_response(self, api_url, tr_id, params, is_post_request=False):
+        """KIS API를 호출하고 KisApiResponse 객체를 반환합니다.
 
         Args:
             api_url (str): API endpoint url
@@ -57,17 +58,13 @@ class KoreaInvestApi:
             is_post_request (bool): POST 요청 여부
 
         Returns:
-            CommonResponseDto: 공통 응답 DTO
-
-        Raises:
-            BaseCustomException: API 요청 실패 예외
+            KisApiResponse: KIS API 응답 객체
         """
         try:
             url = f"{self.using_url}{api_url}"
             headers = self._base_headers
 
             # 추가 Header 설정
-            tr_id = tr_id
             if tr_id[0] in ('T', 'J', 'C'):
                 if self.is_paper_trading:
                     tr_id = 'V' + tr_id[1:]
@@ -75,18 +72,124 @@ class KoreaInvestApi:
             headers["custtype"] = self.cust_type
 
             if is_post_request:
-                res = requests.get(url, headers = headers, data = json.dumps(params))
+                res = requests.post(url, headers=headers, data=json.dumps(params))
             else:
-                res = requests.get(url, headers = headers, params = params)
+                res = requests.get(url, headers=headers, params=params)
 
             res.raise_for_status()
-            api_response = KisApiResponse(res)
-            return api_response.to_api_response_dto()
+            
+            return KisApiResponse(res)  # KIS API 응답 객체 반환
+
         except requests.RequestException as e:
             raise BaseCustomException(
                 ErrorCode.KIS_REQUEST_FAIL,
-                details = {"url": api_url, "tr_id": tr_id, "exception": str(e)}
+                details={"url": api_url, "tr_id": tr_id, "exception": str(e)}
             )
+    def _transform_kis_response(self, url, tr_id, params, is_post_request=False, mappings=None):
+        """KIS API 응답을 컬럼 필터링 및 변환합니다.
+
+        Args:
+            url (str): API 요청 URL
+            tr_id (str): 거래 ID
+            params (dict): API 요청 파라미터
+            is_post_request (bool): POST 요청 여부
+            mappings (dict): 매핑 규칙
+
+        Returns:
+            dict: 필터링 및 변환된 데이터
+        """
+        kis_response = self._fetch_kis_response(url, tr_id, params, is_post_request)
+        
+        if kis_response.is_ok():
+            body = kis_response.get_body()
+            
+            if mappings is None:
+                return body
+
+            result = {}
+            if hasattr(body, "output") and getattr(body, "output"):
+                output_data = getattr(body, "output")
+
+                if isinstance(output_data, dict):
+                    output_data = [output_data]
+
+                result = [
+                    {mappings["output"].get(k, k): v for k, v in item.items() if k in mappings["output"]}
+                    for item in output_data
+                ]
+                return result 
+
+            for key in ["output1", "output2"]:
+                if hasattr(body, key) and getattr(body, key):
+                    output_data = getattr(body, key)
+
+                    if isinstance(output_data, dict):
+                        output_data = [output_data]
+
+                    result[key] = [
+                        {mappings[key].get(k, k): v for k, v in item.items() if k in mappings[key]}
+                        for item in output_data
+                    ]
+            return result if result else body
+
+
+    def _url_fetch(self, url, tr_id, params, is_post_request=False, mappings=None):
+        """API 응답을 CommonResponseDto로 반환합니다.
+
+        Args:
+            transformed_data (list): 필터링 및 변환된 데이터 리스트
+
+        Returns:
+            CommonResponseDto: 처리된 응답 데이터를 포함한 공통 응답 DTO
+        """
+        transformed_data = self._transform_kis_response(url, tr_id, params, is_post_request, mappings)
+
+        return CommonResponseDto(result=transformed_data)
+    
+    def get_send_data(self, cmd=None, stockcode=None):
+        # 입력값 체크 step
+        global tr_type, tr_id
+        assert 0 < cmd < 9, f"Wrong Input Data: {cmd}"
+
+        # 입력값에 따라 전송 데이터셋 구분 처리
+        if cmd == 1:  # 주식 호가 등록
+            tr_id = 'H0STASP0'
+            tr_type = '1'
+        elif cmd == 2:  # 주식 호가 등록 해제
+            tr_id = 'H0STASP0'
+            tr_type = '2'
+        elif cmd == 3:  # 주식 체결 등록
+            tr_id = 'H0STCNT0'
+            tr_type = '1'
+        elif cmd == 4:  # 주식 체결 등록 해제
+            tr_id = 'H0STCNT0'
+            tr_type = '2'
+        elif cmd == 5:  # 주식 체결 통보 등록 (고객용)
+            tr_id = 'H0STCNI0'
+            tr_type = '1'
+        elif cmd == 6:  # 주식 체결 통보 등록 해제 (고객용)
+            tr_id = 'H0STCNI0'
+            tr_type = '2'
+        elif cmd == 7:  # 주식 체결 통보 등록 (모의)
+            tr_id = 'H0STCNI9'
+            tr_type = '1'
+        elif cmd == 8:  # 주식 체결 통보 등록 해제 (모의)
+            tr_id = 'H0STCNI9'
+            tr_type = '2'
+
+        # JSON 생성
+        senddata = (
+            f'{{"header":{{'
+            f'"approval_key":"{self.websocket_approval_key}", '
+            f'"custtype":"{self.cust_type}", '
+            f'"tr_type":"{tr_type}", '
+            f'"content-type":"utf-8"}}, '
+            f'"body":{{"input":{{'
+            f'"tr_id":"{tr_id}", '
+            f'"tr_key":"{self.hts_id if cmd in (5, 6, 7, 8) else stockcode}"}}}}}}'
+        )
+
+        return senddata
 
 
 class KisApiResponse:
@@ -134,10 +237,7 @@ class KisApiResponse:
 
     def is_ok(self):
         try:
-            if self.get_body().rt_cd == '0':
-                return True
-            else:
-                return False
+            return self.get_body().rt_cd == '0'
         except:
             return False
 
@@ -156,25 +256,4 @@ class KisApiResponse:
             logger.info(f'\t-{x}: {getattr(self.get_body(), x)}')
 
     def print_error(self):
-        logger.info(f'------------------------------')
-        logger.info(f'Error in response: {self.get_result_code()}')
-        logger.info(f'{self.get_body().rt_cd}, {self.get_error_code()}, {self.get_error_message()}')
-        logger.info(f'------------------------------')
-
-    def to_api_response_dto(self):
-        """API 응답을 CommonResponseDto 형식으로 변환합니다.
-
-        Returns:
-            CommonResponseDto: 응답 데이터를 포함한 공통 응답 DTO
-
-        Raises:
-            BaseCustomException: API 요청 실패 예외
-        """
-        if self.is_ok():
-            self.print_all()
-            return CommonResponseDto(result = self.get_body().output)
-        else:
-            raise BaseCustomException(
-                ErrorCode.KIS_REQUEST_FAIL,
-                details = {"print_error": self.print_error()}
-            )
+        return f"{self.get_error_code()}:{self.get_error_message()}"
